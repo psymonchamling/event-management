@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 
 export default function CTA() {
   return (
-    <section className="w-full py-20 md:py-32">
+    <section id="about" className="w-full py-20 md:py-32 scroll-mt-20">
       <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col gap-8 items-center text-center">
           <div className="flex flex-col gap-4">

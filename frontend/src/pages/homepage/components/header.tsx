@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Moon, Sun } from "lucide-react";
 import { useState } from "react";
+import type { MouseEvent } from "react";
 import LoginDailog from "@/components/auth/login-dailog";
 import SignupDialog from "@/components/auth/signup-dailog";
 
@@ -13,13 +14,32 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
   const [isLoginOpen, setLoginOpen] = useState<boolean>(false);
   const [isSignupOpen, setSignupOpen] = useState<boolean>(false);
 
+  const handleNavClick = (
+    e: MouseEvent<HTMLAnchorElement>,
+    targetId: string
+  ) => {
+    e.preventDefault();
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleLogoClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center gap-2">
+            <div
+              className="flex items-center gap-2 cursor-pointer"
+              onClick={handleLogoClick}
+              aria-label="Go to top"
+            >
               <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
                 <Calendar className="h-5 w-5 text-primary-foreground" />
               </div>
@@ -33,24 +53,28 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
               <a
                 href="#features"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => handleNavClick(e, "features")}
               >
                 Features
               </a>
               <a
                 href="#about"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => handleNavClick(e, "about")}
               >
                 Browse Events
               </a>
               <a
                 href="#pricing"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => handleNavClick(e, "pricing")}
               >
                 Pricing
               </a>
               <a
                 href="#footer"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                onClick={(e) => handleNavClick(e, "footer")}
               >
                 Footer
               </a>
@@ -86,13 +110,13 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
           </div>
         </div>
       </header>
-      //Login dialog
+      {/* Login dialog */}
       <LoginDailog
         isLoginOpen={isLoginOpen}
         setLoginOpen={setLoginOpen}
         setSignupOpen={setSignupOpen}
       />
-      //Signup dialog
+      {/* Signup dialog */}
       <SignupDialog
         isSignupOpen={isSignupOpen}
         setSignupOpen={setSignupOpen}

@@ -3,7 +3,7 @@ import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 
 export default function Hero() {
   return (
-    <section className="w-full py-20 md:py-32 lg:py-40">
+    <section className="w-full py-10 md:py-15 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12 items-center">
           {/* Left Content */}
