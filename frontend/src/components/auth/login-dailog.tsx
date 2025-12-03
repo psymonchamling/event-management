@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "../ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
 type LoginDialogProps = {
   isLoginOpen: boolean;
@@ -21,6 +22,15 @@ const LoginDailog = ({
   setLoginOpen,
   setSignupOpen,
 }: LoginDialogProps) => {
+  const navigate = useNavigate();
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    // TODO: Replace with real auth call. For now, mock success.
+    localStorage.setItem("isAuthenticated", "true");
+    setLoginOpen(false);
+    navigate({ to: "/dashboard" });
+  };
   return (
     <>
       <Dialog open={isLoginOpen} onOpenChange={setLoginOpen}>
@@ -30,7 +40,7 @@ const LoginDailog = ({
               <DialogTitle>Welcome Back</DialogTitle>
               <DialogDescription>Sign in to your account</DialogDescription>
             </DialogHeader>
-            <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-2">
                 <Label htmlFor="login-email" className="text-sm font-medium">
                   Email

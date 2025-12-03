@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "./components/header";
 import Hero from "./components/hero";
 import Features from "./components/features";
+import BrowseEvents from "./components/browse-events";
 import CTA from "./components/cta";
 import Footer from "./components/footer";
 
@@ -17,6 +18,7 @@ const Homepage = () => {
       <Header theme={theme} onThemeToggle={toggleTheme} />
       <Hero />
       <Features />
+      <BrowseEvents />
       <CTA />
       <Footer />
     </main>

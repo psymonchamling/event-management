@@ -58,9 +58,9 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
                 Features
               </a>
               <a
-                href="#about"
+                href="#browse"
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                onClick={(e) => handleNavClick(e, "about")}
+                onClick={(e) => handleNavClick(e, "browse")}
               >
                 Browse Events
               </a>
