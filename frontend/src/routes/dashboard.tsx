@@ -1,19 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { Calendar, LayoutDashboard, Ticket, Users } from 'lucide-react'
-import React from 'react'
+import { createFileRoute } from "@tanstack/react-router";
+import { Calendar, LayoutDashboard, Ticket, Users } from "lucide-react";
+import React from "react";
 
-export const Route = createFileRoute('/dashboard')({
+export const Route = createFileRoute("/dashboard")({
   component: DashboardPage,
-})
+});
 
 function StatCard({
   icon: Icon,
   label,
   value,
 }: {
-  icon: React.ComponentType<{ className?: string }>
-  label: string
-  value: string
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
 }) {
   return (
     <div className="rounded-xl border border-border p-5 flex items-center gap-4 bg-background">
@@ -25,17 +25,17 @@ function StatCard({
         <span className="text-xl font-semibold text-foreground">{value}</span>
       </div>
     </div>
-  )
+  );
 }
 
-function DashboardPage() {
+function DashboardPage1() {
   React.useEffect(() => {
     // naive auth gate
-    const isAuthed = localStorage.getItem('isAuthenticated') === 'true'
+    const isAuthed = localStorage.getItem("isAuthenticated") === "true";
     if (!isAuthed) {
-      window.location.href = '/'
+      window.location.href = "/";
     }
-  }, [])
+  }, []);
 
   return (
     <main className="min-h-screen bg-background">
@@ -77,15 +77,52 @@ function DashboardPage() {
           <div className="rounded-xl border border-border p-5">
             <h2 className="text-lg font-semibold mb-3">My Registrations</h2>
             <p className="text-sm text-muted-foreground">
-              View tickets and upcoming events you&apos;re attending. (Coming soon)
+              View tickets and upcoming events you&apos;re attending. (Coming
+              soon)
             </p>
           </div>
         </div>
       </section>
     </main>
-  )
+  );
 }
 
-export default DashboardPage
+import { AppSidebar } from "@/components/app-sidebar";
+import { ChartAreaInteractive } from "@/components/chart-area-interactive";
+import { DataTable } from "@/components/data-table";
+import { SectionCards } from "@/components/section-cards";
+import { SiteHeader } from "@/components/site-header";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
+// import data from "./data.json"
 
+function DashboardPage() {
+  return (
+    <SidebarProvider
+      style={
+        {
+          "--sidebar-width": "calc(var(--spacing) * 72)",
+          "--header-height": "calc(var(--spacing) * 12)",
+        } as React.CSSProperties
+      }
+    >
+      <AppSidebar variant="inset" />
+      <SidebarInset>
+        <SiteHeader />
+        <div className="flex flex-1 flex-col">
+          <div className="@container/main flex flex-1 flex-col gap-2">
+            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+              <SectionCards />
+              <div className="px-4 lg:px-6">
+                <ChartAreaInteractive />
+              </div>
+              {/* <DataTable data={data} /> */}
+            </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
+  );
+}
+
+export default DashboardPage;
