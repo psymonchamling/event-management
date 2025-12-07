@@ -5,11 +5,18 @@ import type { MouseEvent } from "react";
 import LoginDailog from "@/components/auth/login-dailog";
 import SignupDialog from "@/components/auth/signup-dailog";
 import { useLocation, useNavigate } from "@tanstack/react-router";
+import { NavUser } from "@/components/nav-user-header";
 
 interface HeaderProps {
   theme: "light" | "dark";
   onThemeToggle: () => void;
 }
+
+const testData = {
+  name: "shadcn",
+  email: "m@example.com",
+  avatar: "/avatars/shadcn.jpg",
+};
 
 export default function Header({ theme, onThemeToggle }: HeaderProps) {
   const navigate = useNavigate();
@@ -107,17 +114,20 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
                   <Sun className="h-4 w-4" />
                 )}
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="hidden sm:inline-flex"
-                onClick={() => setLoginOpen(true)}
-              >
-                Log in
-              </Button>
-              <Button size="sm" onClick={() => setSignupOpen(true)}>
-                Sign up
-              </Button>
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="hidden sm:inline-flex"
+                  onClick={() => setLoginOpen(true)}
+                >
+                  Log in
+                </Button>
+                <Button size="sm" onClick={() => setSignupOpen(true)}>
+                  Sign up
+                </Button>
+              </>
+              <NavUser user={testData} />
             </div>
           </div>
         </div>

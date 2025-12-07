@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, MapPin, Users, Heart } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Users, Heart, Star } from "lucide-react";
 
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetailPage,
@@ -74,6 +74,36 @@ function EventDetailPage() {
   const isAuthed =
     typeof window !== "undefined" &&
     localStorage.getItem("isAuthenticated") === "true";
+
+  const reviews = [
+    {
+      id: 1,
+      name: "Sara P.",
+      rating: 5,
+      date: "Jan 2026",
+      comment:
+        "Fantastic event! The sessions were insightful and very well organized.",
+    },
+    {
+      id: 2,
+      name: "Michael R.",
+      rating: 4,
+      date: "Jan 2026",
+      comment:
+        "Great speakers and content. Could use a bit more Q&A time though.",
+    },
+    {
+      id: 3,
+      name: "Priya K.",
+      rating: 5,
+      date: "Dec 2025",
+      comment:
+        "Loved the networking opportunities. Learned a lot and met amazing people.",
+    },
+  ];
+
+  const averageRating =
+    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   return (
     <main className="min-h-screen bg-background">
@@ -169,6 +199,102 @@ function EventDetailPage() {
                 </div>
               </div>
             </div>
+
+            <div className="mt-8 rounded-xl border border-border p-5">
+              <div className="flex items-center justify-between gap-4">
+                <h3 className="text-lg font-semibold text-foreground">
+                  Customer Reviews
+                </h3>
+                <div className="flex items-center gap-2">
+                  <div className="flex items-center">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-4 w-4 ${
+                          i < Math.round(averageRating)
+                            ? "text-yellow-500 fill-yellow-500"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <span className="text-sm text-muted-foreground">
+                    {averageRating.toFixed(1)} / 5.0
+                  </span>
+                </div>
+              </div>
+              <div className="mt-4 grid gap-4 sm:grid-cols-2">
+                {reviews.map((rev) => (
+                  <div
+                    key={rev.id}
+                    className="rounded-lg border border-border p-4 bg-background"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="font-medium text-foreground">
+                        {rev.name}
+                      </div>
+                      <div className="flex items-center">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3.5 w-3.5 ${
+                              i < rev.rating
+                                ? "text-yellow-500 fill-yellow-500"
+                                : "text-muted-foreground"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="mt-2 text-xs text-muted-foreground">
+                      {rev.date}
+                    </div>
+                    <p className="mt-2 text-sm text-foreground leading-relaxed">
+                      {rev.comment}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-lg font-semibold text-foreground mb-4">
+                Similar Events
+              </h3>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {events
+                  .filter((e) => e.id !== ev.id)
+                  .slice(0, 3)
+                  .map((e) => {
+                    const d = new Date(e.dateISO).toLocaleDateString(
+                      undefined,
+                      { month: "short", day: "numeric", year: "numeric" }
+                    );
+                    return (
+                      <a
+                        key={e.id}
+                        href={`/events/${e.id}`}
+                        className="rounded-xl border border-border bg-background overflow-hidden hover:shadow transition-shadow"
+                      >
+                        <div className="h-28 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20" />
+                        <div className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="text-sm font-semibold text-foreground">
+                              {e.title}
+                            </div>
+                            <span className="text-[11px] px-2 py-1 rounded bg-secondary text-secondary-foreground">
+                              {e.type}
+                            </span>
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">
+                            {e.location} • {d}
+                          </div>
+                        </div>
+                      </a>
+                    );
+                  })}
+              </div>
+            </div>
           </div>
 
           <aside className="lg:col-span-1">
@@ -180,16 +306,22 @@ function EventDetailPage() {
                 <div className="text-muted-foreground">Spaces Available:</div>
                 <div className="font-semibold">{spacesAvailable}</div>
               </div>
-              <button
-                disabled={!isAuthed}
-                className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
-              >
-                {isAuthed ? "Register Now" : "Login to register"}
-              </button>
-              {!isAuthed && (
-                <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                  Login to register for this event
-                </p>
+              {isAuthed ? (
+                <button className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10">
+                  Register Now
+                </button>
+              ) : (
+                <>
+                  <a
+                    href="/login"
+                    className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
+                  >
+                    Login to Register
+                  </a>
+                  <p className="mt-2 text-[11px] text-muted-foreground text-center">
+                    You must be logged in to register for this event
+                  </p>
+                </>
               )}
             </div>
           </aside>

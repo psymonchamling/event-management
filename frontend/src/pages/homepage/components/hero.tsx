@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
+import eventImage from "/public/event_image.jpg";
 
 export default function Hero() {
   return (
@@ -53,17 +54,12 @@ export default function Hero() {
 
           {/* Right Visual */}
           <div className="flex items-center justify-center">
-            <div className="relative w-full max-w-md aspect-square">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 rounded-2xl flex items-center justify-center">
-                <div className="text-center">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-xl bg-primary/10 mb-4">
-                    <Calendar className="h-8 w-8 text-primary" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Event Dashboard
-                  </p>
-                </div>
-              </div>
+            <div className="relative w-full max-w-md aspect-square border overflow-hidden rounded-2xl border">
+              <img
+                src={eventImage}
+                alt="Event Dashboard Preview"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>

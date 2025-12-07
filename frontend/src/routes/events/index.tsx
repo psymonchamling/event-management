@@ -27,6 +27,8 @@ function EventsIndexPage() {
   const [query, setQuery] = React.useState('')
   const [type, setType] = React.useState<'All' | 'Conference' | 'Workshop' | 'Meetup' | 'Seminar' | 'Webinar'>('All')
   const [fromDate, setFromDate] = React.useState<string>('')
+  const [page, setPage] = React.useState(1)
+  const [pageSize] = React.useState(9)
 
   const filtered = React.useMemo(() => {
     return mockEvents.filter(ev => {
@@ -38,6 +40,16 @@ function EventsIndexPage() {
       const matchesDate = !fromDate || new Date(ev.dateISO) >= new Date(fromDate)
       return matchesQuery && matchesType && matchesDate
     })
+  }, [query, type, fromDate])
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize))
+  const currentPage = Math.min(page, totalPages)
+  const start = (currentPage - 1) * pageSize
+  const end = start + pageSize
+  const paged = filtered.slice(start, end)
+
+  React.useEffect(() => {
+    setPage(1)
   }, [query, type, fromDate])
 
   return (
@@ -93,7 +105,7 @@ function EventsIndexPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((ev) => (
+          {paged.map((ev) => (
             <a
               key={ev.id}
               href={`/events/${ev.id}`}
@@ -119,6 +131,44 @@ function EventsIndexPage() {
               </article>
             </a>
           ))}
+        </div>
+
+        {/* Pagination */}
+        <div className="mt-6 flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Showing {filtered.length === 0 ? 0 : start + 1}-{Math.min(end, filtered.length)} of {filtered.length}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+            >
+              Prev
+            </button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const p = i + 1
+                const isActive = p === currentPage
+                return (
+                  <button
+                    key={p}
+                    onClick={() => setPage(p)}
+                    className={`h-8 w-8 rounded-md border text-sm ${isActive ? 'bg-secondary text-secondary-foreground' : 'bg-background'}`}
+                  >
+                    {p}
+                  </button>
+                )
+              })}
+            </div>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
+            >
+              Next
+            </button>
+          </div>
         </div>
       </section>
     </main>
