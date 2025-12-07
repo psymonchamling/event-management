@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import connectDB from "./config/database.js";
+import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 
@@ -12,6 +13,8 @@ app.use(express.urlencoded({ extended: true }));
 app.get("/", (req, res) => {
   res.json({ message: "hello this is express" });
 });
+
+app.use(authRouter);
 
 // 404 handler - must be after all routes
 app.use((req, res, next) => {
