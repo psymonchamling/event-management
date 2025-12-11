@@ -70,12 +70,10 @@ const SignupDialog = ({
     mutationFn: (data: MutationData) =>
       axios.post(`${apiUrl}/signup`, data, { withCredentials: true }),
     onSuccess: () => {
-      // handle success (e.g., show toast, redirect, etc.)
       handleDialogOnOpenChange(false);
       navigate({ to: "/dashboard" });
     },
     onError: (err: AxiosError<{ error?: { email?: string } }>) => {
-      // handle error (e.g., show error message)
       const emailError = err.response?.data?.error?.email;
       if (emailError) {
         setError("email", { type: "server", message: emailError });
@@ -86,8 +84,8 @@ const SignupDialog = ({
 
   function onFinalSubmit(data: FormData) {
     const { confirmPassword, ...finalData } = data;
-
-    console.log({ confirmPassword, finalData });
+    // Intentionally ignore confirmPassword here because it's only used for client-side validation via Yup.
+    void confirmPassword;
 
     mutateForm(finalData);
   }
@@ -99,12 +97,6 @@ const SignupDialog = ({
 
   return (
     <>
-      {/* 
-        The 'onOpenChange' prop on the <Dialog> component is a callback that gets called 
-        whenever the dialog's open state changes (for example, when the dialog is opened or closed 
-        by the user or programmatically). Here, 'handleDialogOnOpenChange' is used to 
-        update the local state for 'isSignupOpen' and also resets the form when the dialog is closed.
-      */}
       <Dialog open={isSignupOpen} onOpenChange={handleDialogOnOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
