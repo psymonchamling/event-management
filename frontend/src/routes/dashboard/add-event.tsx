@@ -107,7 +107,7 @@ function AddEventPage() {
         </nav>
       </header>
 
-      <form
+        <form
         id="add-event-form"
         onSubmit={onSubmit}
         className="grid gap-6 lg:grid-cols-3"
@@ -128,8 +128,8 @@ function AddEventPage() {
                 <Label htmlFor="title">
                   Title <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="title"
+              <Input
+                id="title"
                   placeholder="e.g., Tech Innovators Summit"
                   value={form.title}
                   onChange={onChange("title")}
@@ -156,7 +156,7 @@ function AddEventPage() {
                   value={form.type}
                   onChange={onChange("type")}
                   aria-invalid={!!errors.type}
-                >
+              >
                   <option value="">Select a category</option>
                   {EVENT_TYPES.map((t) => (
                     <option key={t} value={t}>
@@ -175,7 +175,7 @@ function AddEventPage() {
                 <Label htmlFor="dateTime">
                   Date & Time <span className="text-red-500">*</span>
                 </Label>
-                <Input
+              <Input
                   id="dateTime"
                   type="datetime-local"
                   value={form.dateTime}
@@ -228,8 +228,8 @@ function AddEventPage() {
             <div>
               <div className="flex flex-col gap-2">
                 <Label htmlFor="location">Location</Label>
-                <Input
-                  id="location"
+              <Input
+                id="location"
                   placeholder="e.g., San Francisco, CA or Zoom"
                   value={form.location}
                   onChange={onChange("location")}
@@ -260,11 +260,11 @@ function AddEventPage() {
             <div className="grid gap-4 md:grid-cols-2">
             <div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="price">Price (USD)</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  min={0}
+              <Label htmlFor="price">Price (USD)</Label>
+              <Input
+                id="price"
+                type="number"
+                min={0}
                   step="0.01"
                   placeholder="0.00"
                   value={form.price}
@@ -284,10 +284,10 @@ function AddEventPage() {
 
             <div>
               <div className="flex flex-col gap-2">
-                <Label htmlFor="capacity">Capacity</Label>
-                <Input
-                  id="capacity"
-                  type="number"
+              <Label htmlFor="capacity">Capacity</Label>
+              <Input
+                id="capacity"
+                type="number"
                   min={0}
                   placeholder="e.g., 150"
                   value={form.capacity}
@@ -313,13 +313,13 @@ function AddEventPage() {
             </div>
             <div className="md:col-span-2">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="bannerUrl">Banner Image URL</Label>
-                <Input
-                  id="bannerUrl"
-                  placeholder="https://example.com/banner.jpg"
+              <Label htmlFor="bannerUrl">Banner Image URL</Label>
+              <Input
+                id="bannerUrl"
+                placeholder="https://example.com/banner.jpg"
                   value={form.bannerUrl}
                   onChange={onChange("bannerUrl")}
-                />
+              />
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
                 Recommended aspect ratio 16:9.
@@ -333,9 +333,9 @@ function AddEventPage() {
             </div>
             <div className="md:col-span-2">
               <div className="flex flex-col gap-2">
-                <Label htmlFor="description">Description</Label>
-                <textarea
-                  id="description"
+              <Label htmlFor="description">Description</Label>
+              <textarea
+                id="description"
                   rows={5}
                   className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm"
                   placeholder="Write a compelling description..."
@@ -381,8 +381,8 @@ function AddEventPage() {
           <p className="mt-6 text-[11px] text-muted-foreground">
             Tip: Add a recognizable organizer name and contact email for trust.
           </p>
-        </div>
-      </form>
+          </div>
+        </form>
     </div>
   );
 }

@@ -315,12 +315,12 @@ function EventDetailPage() {
                   <a
                     href="/login"
                     className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
-                  >
+              >
                     Login to Register
                   </a>
-                  <p className="mt-2 text-[11px] text-muted-foreground text-center">
+                <p className="mt-2 text-[11px] text-muted-foreground text-center">
                     You must be logged in to register for this event
-                  </p>
+                </p>
                 </>
               )}
             </div>

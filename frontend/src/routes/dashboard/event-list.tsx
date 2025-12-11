@@ -183,7 +183,7 @@ function EventListPage() {
 
         {/* Pagination */}
         <div className="mt-6 flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground">
             Showing {filtered.length === 0 ? 0 : start + 1}-
             {Math.min(end, filtered.length)} of {filtered.length}
           </div>
