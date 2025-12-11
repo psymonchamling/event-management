@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import jwt from "jsonwebtoken";
 
 const handleError = (err) => {
   console.log({ err });
@@ -7,7 +8,7 @@ const handleError = (err) => {
   //dublication error
   if (err?.code === 11000) {
     console.log("err same email");
-    finalError.email = "That email is already registered.";
+    finalError.email = "This email is already registered.";
     return finalError;
   }
 
@@ -21,6 +22,13 @@ const handleError = (err) => {
   return finalError;
 };
 
+const maxAge = 3 * 24 * 60 * 60;
+const createToken = (id) => {
+  return jwt.sign({ id }, "my secret key", {
+    expiresIn: maxAge,
+  });
+};
+
 export const signup_get = (req, res) => {
   res.send("signup");
 };
@@ -32,9 +40,13 @@ export const login_get = (req, res) => {
 export const signup_post = async (req, res) => {
   const { email, password } = req.body;
 
+  console.log(req.body);
+
   try {
     const user = await User.create({ email, password });
-    res.status(201).json(user);
+    const token = createToken(user._id);
+    res.cookie("jwt", token, { httpOnly: true, maxAge: maxAge * 1000 });
+    res.status(201).json({ user: user._id });
   } catch (err) {
     const error = handleError(err);
     res.status(400).json({ error });

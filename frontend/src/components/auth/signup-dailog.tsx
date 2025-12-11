@@ -10,10 +10,11 @@ import { Label } from "@/components/ui/label";
 import type { Dispatch, SetStateAction } from "react";
 import { Button } from "../ui/button";
 import { useMutation } from "@tanstack/react-query";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
+import { useNavigate } from "@tanstack/react-router";
 
 type SignupDialogProps = {
   isSignupOpen: boolean;
@@ -30,7 +31,7 @@ const schema = yup.object({
   password: yup
     .string()
     .required("Password is required.")
-    .min(5, "Password must be at least 5 characters."),
+    .min(6, "Password must be at least 6 characters."),
   confirmPassword: yup
     .string()
     .required()
@@ -44,47 +45,67 @@ type FormData = {
   confirmPassword: string;
 };
 
+type MutationData = Omit<FormData, "confirmPassword">;
+
 const SignupDialog = ({
   isSignupOpen,
   setSignupOpen,
   setLoginOpen,
 }: SignupDialogProps) => {
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
+    reset,
     formState: { errors },
+    setError,
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
 
-  const mutation = useMutation({
-    mutationFn: async (data: { email: string; password: string }) => {
-      // Replace the URL and data as needed for your app
-      return axios.post("/api/signup");
-      // if (!response.ok) {
-      //   throw new Error("Failed to signup");
-      // }
-      // return response.json();
+  const apiUrl = import.meta.env.VITE_BASE_URL;
+
+  const { mutate: mutateForm, isPending: isPendingForm } = useMutation({
+    mutationFn: (data: MutationData) =>
+      axios.post(`${apiUrl}/signup`, data, { withCredentials: true }),
+    onSuccess: () => {
+      // handle success (e.g., show toast, redirect, etc.)
+      handleDialogOnOpenChange(false);
+      navigate({ to: "/dashboard" });
     },
-    // onSuccess: (data) => {
-    //   // handle success (e.g., show toast, redirect, etc.)
-    // },
-    // onError: (error) => {
-    //   // handle error (e.g., show error message)
-    // },
+    onError: (err: AxiosError<{ error?: { email?: string } }>) => {
+      // handle error (e.g., show error message)
+      const emailError = err.response?.data?.error?.email;
+      if (emailError) {
+        setError("email", { type: "server", message: emailError });
+      }
+      console.error(err);
+    },
   });
 
   function onFinalSubmit(data: FormData) {
     const { confirmPassword, ...finalData } = data;
-    
+
     console.log({ confirmPassword, finalData });
 
-    // mutation.mutate({ email: email!, password });
+    mutateForm(finalData);
+  }
+
+  function handleDialogOnOpenChange(isOpen: boolean) {
+    setSignupOpen(isOpen);
+    if (!isOpen) reset();
   }
 
   return (
     <>
-      <Dialog open={isSignupOpen} onOpenChange={setSignupOpen}>
+      {/* 
+        The 'onOpenChange' prop on the <Dialog> component is a callback that gets called 
+        whenever the dialog's open state changes (for example, when the dialog is opened or closed 
+        by the user or programmatically). Here, 'handleDialogOnOpenChange' is used to 
+        update the local state for 'isSignupOpen' and also resets the form when the dialog is closed.
+      */}
+      <Dialog open={isSignupOpen} onOpenChange={handleDialogOnOpenChange}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create an account</DialogTitle>
@@ -100,6 +121,7 @@ const SignupDialog = ({
                 placeholder="John Doe"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 {...register("name")}
+                disabled={isPendingForm}
               />
               {!!errors?.name?.message && (
                 <p className="text-xs text-red-500">{errors.name.message}</p>
@@ -114,6 +136,7 @@ const SignupDialog = ({
                 placeholder="you@example.com"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 {...register("email")}
+                disabled={isPendingForm}
               />
               {!!errors?.email?.message && (
                 <p className="text-xs text-red-500">{errors.email.message}</p>
@@ -128,6 +151,7 @@ const SignupDialog = ({
                 placeholder="••••••••"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 {...register("password")}
+                disabled={isPendingForm}
               />
               {!!errors?.password?.message && (
                 <p className="text-xs text-red-500">
@@ -144,6 +168,7 @@ const SignupDialog = ({
                 placeholder="••••••••"
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
                 {...register("confirmPassword")}
+                disabled={isPendingForm}
               />
               {!!errors?.confirmPassword?.message && (
                 <p className="text-xs text-red-500">
@@ -151,8 +176,8 @@ const SignupDialog = ({
                 </p>
               )}
             </div>
-            <Button type="submit" className="w-full">
-              Sign up
+            <Button type="submit" className="w-full" disabled={isPendingForm}>
+              {isPendingForm ? "Signing up..." : "Sign up"}
             </Button>
           </form>
           <p className="text-center text-sm text-muted-foreground">
@@ -161,7 +186,7 @@ const SignupDialog = ({
               type="button"
               className="text-primary underline underline-offset-4"
               onClick={() => {
-                setSignupOpen(false);
+                handleDialogOnOpenChange(false);
                 setLoginOpen(true);
               }}
             >

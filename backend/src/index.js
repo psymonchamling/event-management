@@ -3,6 +3,7 @@ import "dotenv/config";
 import connectDB from "./config/database.js";
 import authRouter from "./routes/authRoutes.js";
 import cookiePraser from "cookie-parser";
+import cors from "cors";
 
 const app = express();
 
@@ -10,6 +11,7 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookiePraser());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 //Routes
 app.get("/", (req, res) => {
