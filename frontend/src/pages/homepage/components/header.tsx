@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
 import LoginDailog from "@/components/auth/login-dailog";
 import SignupDialog from "@/components/auth/signup-dailog";
-import { useLocation, useNavigate } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { NavUser } from "@/components/nav-user-header";
 import { useAuth } from "@/context/auth-context/auth-context";
 
@@ -25,6 +25,8 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
 
   const { userData, refetchUserData, isFetchingUserData, isLoggedIn } =
     useAuth();
+
+  // console.log("inside auth: ", userData, isLoggedIn);
 
   const isHomePage: boolean = pathname === "/";
 
@@ -54,8 +56,6 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
     refetchUserData();
   }, []);
 
-  console.log({ isLoggedIn, isFetchingUserData });
-
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -77,36 +77,51 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
 
             {/* Navigation */}
             {isHomePage && (
-              <nav className="hidden md:flex items-center gap-8">
-                <a
-                  href="#features"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={(e) => handleNavClick(e, "features")}
-                >
-                  Features
-                </a>
-                <a
-                  href="#browse"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={(e) => handleNavClick(e, "browse")}
-                >
-                  Browse Events
-                </a>
-                <a
-                  href="#pricing"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={(e) => handleNavClick(e, "pricing")}
-                >
-                  Pricing
-                </a>
-                <a
-                  href="#footer"
-                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                  onClick={(e) => handleNavClick(e, "footer")}
-                >
-                  Footer
-                </a>
-              </nav>
+              <>
+                {isLoggedIn ? (
+                  <nav className="hidden md:flex items-center gap-8">
+                    <Link
+                      // href="#features"
+                      to="/dashboard"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      // onClick={(e) => handleNavClick(e, "features")}
+                    >
+                      Dashboard
+                    </Link>
+                  </nav>
+                ) : (
+                  <nav className="hidden md:flex items-center gap-8">
+                    <a
+                      href="#features"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => handleNavClick(e, "features")}
+                    >
+                      Features
+                    </a>
+                    <a
+                      href="#browse"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => handleNavClick(e, "browse")}
+                    >
+                      Browse Events
+                    </a>
+                    <a
+                      href="#pricing"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => handleNavClick(e, "pricing")}
+                    >
+                      Pricing
+                    </a>
+                    <a
+                      href="#footer"
+                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      onClick={(e) => handleNavClick(e, "footer")}
+                    >
+                      Footer
+                    </a>
+                  </nav>
+                )}
+              </>
             )}
 
             {/* Auth Buttons & Theme Toggle */}

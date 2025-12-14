@@ -1,8 +1,5 @@
 import Header from "@/pages/homepage/components/header";
-import {
-  createRootRouteWithContext,
-  Outlet,
-} from "@tanstack/react-router";
+import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { useState } from "react";
 import type { AuthContextValue } from "@/context/auth-context/auth-context";
 

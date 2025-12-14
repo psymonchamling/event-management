@@ -22,7 +22,7 @@ export function NavMain({
 
   const checkIsActive = useCallback(
     (url: string) => {
-      console.log({ url, pathname });
+      // console.log({ url, pathname });
       return pathname === url;
     },
     [pathname]

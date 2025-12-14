@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import eventImage from "/public/event_image.jpg";
+import { useNavigate } from "@tanstack/react-router";
 
 export default function Hero() {
+  const navigate = useNavigate();
   return (
     <section className="w-full py-10 md:py-15 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -31,7 +33,11 @@ export default function Hero() {
               <Button size="lg" className="gap-2">
                 Create Your Event <ArrowRight className="h-4 w-4" />
               </Button>
-              <Button size="lg" variant="outline">
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => navigate({ to: "/events" })}
+              >
                 Explore Events
               </Button>
             </div>
