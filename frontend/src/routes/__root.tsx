@@ -1,6 +1,10 @@
 import Header from "@/pages/homepage/components/header";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import {
+  createRootRouteWithContext,
+  Outlet,
+} from "@tanstack/react-router";
 import { useState } from "react";
+import type { AuthContextValue } from "@/context/auth-context/auth-context";
 
 const RootLayout = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -18,4 +22,8 @@ const RootLayout = () => {
   );
 };
 
-export const Route = createRootRoute({ component: RootLayout });
+export const Route = createRootRouteWithContext<{
+  auth: AuthContextValue | undefined;
+}>()({
+  component: RootLayout,
+});

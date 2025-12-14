@@ -1,12 +1,18 @@
-import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import React from "react";
-
-export const Route = createFileRoute("/dashboard")({
-  component: DashboardPage,
-});
-
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
+export const Route = createFileRoute("/dashboard")({
+  beforeLoad: ({ context }) => {
+    if (!context?.auth?.isLoggedIn) {
+      throw redirect({
+        to: "/",
+      });
+    }
+  },
+  component: DashboardPage,
+});
 
 function DashboardPage() {
   return (
