@@ -1,11 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Moon, Sun } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
 import LoginDailog from "@/components/auth/login-dailog";
 import SignupDialog from "@/components/auth/signup-dailog";
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { NavUser } from "@/components/nav-user-header";
+import { useAuth } from "@/context/auth-context/auth-context";
 
 interface HeaderProps {
   theme: "light" | "dark";
@@ -21,6 +22,9 @@ const testData = {
 export default function Header({ theme, onThemeToggle }: HeaderProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
+
+  const { userData, refetchUserData, isFetchingUserData, isLoggedIn } =
+    useAuth();
 
   const isHomePage: boolean = pathname === "/";
 
@@ -45,6 +49,12 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
     }
     navigate({ to: "/" });
   };
+
+  useEffect(() => {
+    refetchUserData();
+  }, []);
+
+  console.log({ isLoggedIn, isFetchingUserData });
 
   return (
     <>
@@ -100,35 +110,40 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
             )}
 
             {/* Auth Buttons & Theme Toggle */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onThemeToggle}
-                className="h-9 w-9 p-0"
-                aria-label="Toggle theme"
-              >
-                {theme === "light" ? (
-                  <Moon className="h-4 w-4" />
-                ) : (
-                  <Sun className="h-4 w-4" />
-                )}
-              </Button>
-              <>
-                <Button
+            {!isFetchingUserData && (
+              <div className="flex items-center gap-3">
+                {/* <Button
                   variant="ghost"
                   size="sm"
-                  className="hidden sm:inline-flex"
-                  onClick={() => setLoginOpen(true)}
+                  onClick={onThemeToggle}
+                  className="h-9 w-9 p-0"
+                  aria-label="Toggle theme"
                 >
-                  Log in
-                </Button>
-                <Button size="sm" onClick={() => setSignupOpen(true)}>
-                  Sign up
-                </Button>
-              </>
-              <NavUser user={testData} />
-            </div>
+                  {theme === "light" ? (
+                    <Moon className="h-4 w-4" />
+                  ) : (
+                    <Sun className="h-4 w-4" />
+                  )}
+                </Button> */}
+                {isLoggedIn ? (
+                  <NavUser user={testData} />
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="hidden sm:inline-flex"
+                      onClick={() => setLoginOpen(true)}
+                    >
+                      Log in
+                    </Button>
+                    <Button size="sm" onClick={() => setSignupOpen(true)}>
+                      Sign up
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </header>

@@ -64,8 +64,8 @@ const LoginDailog = ({
       handleDialogOnOpenChange(false);
       navigate({ to: "/dashboard" });
     },
-    onError: (err: AxiosError<{ error?: { email?: string } }>) => {
-      const emailError = err.response?.data?.error?.email;
+    onError: (err: AxiosError<{ errors?: { email?: string } }>) => {
+      const emailError = err.response?.data?.errors?.email;
       if (emailError) {
         setError("email", { type: "server", message: emailError });
       }
@@ -74,7 +74,7 @@ const LoginDailog = ({
   });
 
   function onFinalSubmit(data: FormData) {
-    // mutateForm(data);
+    mutateForm(data);
   }
 
   function handleDialogOnOpenChange(isOpen: boolean) {

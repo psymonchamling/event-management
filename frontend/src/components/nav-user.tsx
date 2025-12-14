@@ -94,7 +94,7 @@ export function NavUser({
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <IconLogout />
-              Log out
+              Log out1
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

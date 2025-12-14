@@ -4,6 +4,8 @@ import connectDB from "./config/database.js";
 import authRouter from "./routes/authRoutes.js";
 import cookiePraser from "cookie-parser";
 import cors from "cors";
+import reqireAuth from "../middleware/authMiddleware.js";
+import { getUserDetail } from "./controllers/userController.js";
 
 const app = express();
 
@@ -14,30 +16,9 @@ app.use(cookiePraser());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 
 //Routes
-app.get("/", (req, res) => {
-  res.json({ message: "hello this is express" });
-});
+app.get("/api/userdetail", reqireAuth, getUserDetail);
 
 app.use(authRouter);
-
-// app.get("/set-cookies", (req, res) => {
-//   // res.setHeader("Set-Cookie", "newUser=Bikash");
-//   res.cookie("newUser", "new bikash");
-//   res.cookie("isEmployee", true, {
-//     maxAge: 1000 * 60 * 60 * 24,
-//     httpOnly: true,
-//     // secure: true     //only highlight in https
-//   });
-
-//   res.send("you got the cookies");
-// });
-
-// app.get("/read-cookies", (req, res) => {
-//   const cookies = req.cookies;
-//   console.log({ cookies: cookies.newUser });
-
-//   res.json(cookies);
-// });
 
 // 404 handler - must be after all routes
 app.use((req, res, next) => {

@@ -30,6 +30,22 @@ userSchema.post("save", function (doc) {
   console.log("new user was created and saved", doc);
 });
 
+// static method to login user
+// NOTE: in Mongoose, use `schema.statics` (or `schema.static("name", fn)`)
+// to define static methods on the model.
+userSchema.statics.login = async function (email, password) {
+  const user = await this.findOne({ email });
+  if (!user) {
+    throw Error("Incorrect email");
+  }
+
+  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  if (isPasswordCorrect) {
+    return user;
+  }
+  throw Error("Incorrect password");
+};
+
 const User = mongoose.model("user", userSchema);
 
 export default User;
