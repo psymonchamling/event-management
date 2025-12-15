@@ -55,8 +55,11 @@ const features = [
 
 export default function Features() {
   return (
-    <section id="features" className="w-full py-20 md:py-32 bg-secondary/30 scroll-mt-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 border">
+    <section
+      id="features"
+      className="w-full py-20 md:py-32 bg-secondary/30 scroll-mt-20"
+    >
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="mb-16 flex flex-col gap-4">
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-balance">
             Everything You Need to Host Great Events

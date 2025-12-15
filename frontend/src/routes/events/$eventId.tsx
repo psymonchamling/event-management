@@ -173,12 +173,18 @@ function EventDetailPage() {
               </div>
               <div className="flex items-center gap-2">
                 {isCurrentUser && (
-                  <a
-                    href={`/dashboard/edit-event?eventId=${eventId}`}
-                    className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition"
-                  >
-                    Edit event
-                  </a>
+                  <>
+                    <a
+                      href={`/dashboard/edit-event?eventId=${eventId}`}
+                      className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition"
+                    >
+                      Edit event
+                    </a>
+                    <DeleteEventButton
+                      eventId={eventId}
+                      eventTitle={eventDetail.title}
+                    />
+                  </>
                 )}
                 <button
                   aria-label="Add to favorites"
@@ -363,9 +369,13 @@ function EventDetailPage() {
                 <div className="font-semibold">{eventDetail?.capacity}</div>
               </div>
               {isAuthed ? (
-                <button className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10">
-                  Register Now
-                </button>
+                <>
+                  {!isCurrentUser && (
+                    <button className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10">
+                      Register Now
+                    </button>
+                  )}
+                </>
               ) : (
                 <>
                   <a
@@ -384,6 +394,74 @@ function EventDetailPage() {
         </div>
       </section>
     </main>
+  );
+}
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useNavigate } from "@tanstack/react-router";
+import { useMutation } from "@tanstack/react-query";
+import { useState } from "react";
+
+function DeleteEventButton({
+  eventId,
+  eventTitle,
+}: {
+  eventId: string;
+  eventTitle: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const mutation = useMutation({
+    mutationFn: async () => {
+      await authAxios.delete(`/api/events/${eventId}`);
+    },
+    onSuccess: () => {
+      setOpen(false);
+      navigate({ to: "/dashboard/event-list" });
+    },
+  });
+
+  return (
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogTrigger asChild>
+        <button className="rounded-md border border-destructive border-opacity-40 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 focus:bg-destructive/20 transition">
+          Delete
+        </button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete this event?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Are you sure you want to delete the event
+            <span className="font-semibold"> "{eventTitle}"</span>?
+            <br />
+            This action cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={mutation.isPending}>
+            Cancel
+          </AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            onClick={() => mutation.mutate()}
+            disabled={mutation.isPending}
+          >
+            {mutation.isPending ? "Deleting..." : "Yes, Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }
 

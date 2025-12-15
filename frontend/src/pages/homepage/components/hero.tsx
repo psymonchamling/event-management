@@ -2,9 +2,23 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import eventImage from "/public/event_image.jpg";
 import { useNavigate } from "@tanstack/react-router";
+import { useAuth } from "@/context/auth-context/auth-context";
+import { useLoginDailogContext } from "@/context/login-dialog-context/login-dialog-context";
 
 export default function Hero() {
   const navigate = useNavigate();
+
+  const { isLoggedIn } = useAuth();
+  const { isLoginDialogOpen, setLoginDialogOpen } = useLoginDailogContext();
+
+  console.log({ isLoggedIn, isLoginDialogOpen });
+  function handleCreateEventButton() {
+    if (isLoggedIn) {
+      navigate({ to: "/dashboard/add-event" });
+      return;
+    }
+    setLoginDialogOpen(true);
+  }
 
   return (
     <section className="w-full py-10 md:py-15 lg:py-20">
@@ -31,7 +45,11 @@ export default function Hero() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
-              <Button size="lg" className="gap-2">
+              <Button
+                size="lg"
+                className="gap-2"
+                onClick={handleCreateEventButton}
+              >
                 Create Your Event <ArrowRight className="h-4 w-4" />
               </Button>
               <Button

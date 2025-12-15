@@ -9,7 +9,7 @@ const Homepage = () => {
     <main className="min-h-screen bg-background">
       <Hero />
       <Features />
-      <BrowseEvents />
+      {/* <BrowseEvents /> */}
       <CTA />
       <Footer />
     </main>

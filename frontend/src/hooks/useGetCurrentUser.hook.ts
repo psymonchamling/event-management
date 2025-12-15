@@ -5,6 +5,12 @@ type UserDetailResponse = {
   user: {
     _id: string;
     email: string;
+    name?: string;
+    bio?: string;
+    organization?: string;
+    website?: string;
+    location?: string;
+    timezone?: string;
   } | null;
 };
 

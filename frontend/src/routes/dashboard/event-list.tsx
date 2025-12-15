@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useReducer, useRef, useState } from "react";
 import { Calendar, MapPin, Search, Filter } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
@@ -149,12 +149,12 @@ function EventListPage() {
               Manage and review your events
             </p>
           </div>
-          <a
-            href="/dashboard/add-event"
+          <Link
+            to="/dashboard/add-event"
             className="inline-flex items-center rounded-md bg-primary px-3 py-2 text-sm font-medium text-primary-foreground shadow hover:bg-primary/90"
           >
             Add Event
-          </a>
+          </Link>
         </div>
 
         <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

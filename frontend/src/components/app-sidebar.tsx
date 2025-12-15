@@ -1,6 +1,7 @@
 import * as React from "react";
 import {
   IconCamera,
+  IconClipboardList,
   IconDashboard,
   IconDatabase,
   IconFileAi,
@@ -18,6 +19,7 @@ import {
   SidebarContent,
   SidebarFooter,
 } from "@/components/ui/sidebar";
+import useLogout from "@/hooks/useLogout.hook";
 
 const data = {
   user: {
@@ -35,6 +37,11 @@ const data = {
       title: "My Events",
       url: "/dashboard/event-list",
       icon: IconListDetails,
+    },
+    {
+      title: "My Registration",
+      url: "/dashboard/registration",
+      icon: IconClipboardList,
     },
     // {
     //   title: "Analytics",
@@ -137,6 +144,8 @@ const data = {
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { logout } = useLogout();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       {/* <SidebarHeader>
@@ -160,22 +169,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            // Insert your logout logic here
-            // e.g. call logout API, clear auth, redirect, etc.
-            alert("Logged out."); // Placeholder action
-          }}
+        <button
+          type="button"
+          className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none"
+          onClick={() => logout()}
         >
-          <button
-            type="submit"
-            className="w-full flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 focus:outline-none"
-          >
-            <IconLogout className="w-5 h-5 text-destructive" />
-            <span>Logout</span>
-          </button>
-        </form>
+          <IconLogout className="w-5 h-5 text-destructive" />
+          <span>Logout</span>
+        </button>
       </SidebarFooter>
     </Sidebar>
   );

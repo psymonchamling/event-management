@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin, Search, Filter } from "lucide-react";
-import React from "react";
+import React, { useEffect } from "react";
 
 import authAxios from "@/services/authAxios";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -57,7 +57,8 @@ function EventsIndexPage() {
         (ev.location ?? "").toLowerCase().includes(query.toLowerCase());
 
       const matchesType =
-        type === "All" || (ev.type && ev.type.toLowerCase() === type.toLowerCase());
+        type === "All" ||
+        (ev.type && ev.type.toLowerCase() === type.toLowerCase());
 
       const eventDate = ev.dateTime ? new Date(ev.dateTime) : undefined;
       const matchesDate =
@@ -76,6 +77,10 @@ function EventsIndexPage() {
   React.useEffect(() => {
     setPage(1);
   }, [query, type, fromDate]);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, []);
 
   return (
     <main className="min-h-screen bg-background">
@@ -132,7 +137,7 @@ function EventsIndexPage() {
               <option value="Webinar">Webinar</option>
             </select>
           </div>
-          <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
+          {/* <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
             <Calendar className="h-4 w-4 text-muted-foreground" />
             <input
               type="date"
@@ -140,7 +145,7 @@ function EventsIndexPage() {
               value={fromDate}
               onChange={(e) => setFromDate(e.target.value)}
             />
-          </div>
+          </div> */}
         </div>
 
         {isLoading ? (
@@ -270,5 +275,3 @@ function EventsIndexPage() {
 }
 
 export default EventsIndexPage;
-
-

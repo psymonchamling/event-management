@@ -7,6 +7,7 @@ import SignupDialog from "@/components/auth/signup-dailog";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { NavUser } from "@/components/nav-user-header";
 import { useAuth } from "@/context/auth-context/auth-context";
+import { useLoginDailogContext } from "@/context/login-dialog-context/login-dialog-context";
 
 interface HeaderProps {
   theme: "light" | "dark";
@@ -23,15 +24,12 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
-  const { userData, refetchUserData, isFetchingUserData, isLoggedIn } =
-    useAuth();
+  const { refetchUserData, isFetchingUserData, isLoggedIn } = useAuth();
+  const { isLoginDialogOpen, setLoginDialogOpen } = useLoginDailogContext();
 
-  // console.log("inside auth: ", userData, isLoggedIn);
+  const [isSignupOpen, setSignupOpen] = useState<boolean>(false);
 
   const isHomePage: boolean = pathname === "/";
-
-  const [isLoginOpen, setLoginOpen] = useState<boolean>(false);
-  const [isSignupOpen, setSignupOpen] = useState<boolean>(false);
 
   const handleNavClick = (
     e: MouseEvent<HTMLAnchorElement>,
@@ -63,7 +61,7 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
           <div className="flex h-16 items-center justify-between">
             {/* Logo */}
             <div
-              className="flex items-center gap-2 cursor-pointer border"
+              className="flex items-center gap-2 cursor-pointer"
               onClick={handleLogoClick}
               aria-label="Go to top"
             >
@@ -76,53 +74,51 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
             </div>
 
             {/* Navigation */}
-            {isHomePage && (
-              <>
-                {isLoggedIn ? (
-                  <nav className="hidden md:flex items-center gap-8">
-                    <Link
-                      // href="#features"
-                      to="/dashboard"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      // onClick={(e) => handleNavClick(e, "features")}
-                    >
-                      Dashboard
-                    </Link>
-                  </nav>
-                ) : (
-                  <nav className="hidden md:flex items-center gap-8">
-                    <a
-                      href="#features"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={(e) => handleNavClick(e, "features")}
-                    >
-                      Features
-                    </a>
-                    <a
-                      href="#browse"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={(e) => handleNavClick(e, "browse")}
-                    >
-                      Browse Events
-                    </a>
-                    <a
-                      href="#pricing"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={(e) => handleNavClick(e, "pricing")}
-                    >
-                      Pricing
-                    </a>
-                    <a
-                      href="#footer"
-                      className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      onClick={(e) => handleNavClick(e, "footer")}
-                    >
-                      Footer
-                    </a>
-                  </nav>
-                )}
-              </>
-            )}
+            <nav className="hidden md:flex items-center gap-8">
+              {isHomePage && (
+                <>
+                  {isLoggedIn ? (
+                    <>
+                      <Link
+                        to="/dashboard"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Dashboard
+                      </Link>
+                      <Link
+                        to="/events"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Explore Event
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href="#features"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={(e) => handleNavClick(e, "features")}
+                      >
+                        Features
+                      </a>
+                      <Link
+                        to="/events"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                      >
+                        Explore Event
+                      </Link>
+                      <a
+                        href="#footer"
+                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                        onClick={(e) => handleNavClick(e, "footer")}
+                      >
+                        Footer
+                      </a>
+                    </>
+                  )}
+                </>
+              )}
+            </nav>
 
             {/* Auth Buttons & Theme Toggle */}
             {!isFetchingUserData && (
@@ -148,7 +144,7 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
                       variant="ghost"
                       size="sm"
                       className="hidden sm:inline-flex"
-                      onClick={() => setLoginOpen(true)}
+                      onClick={() => setLoginDialogOpen(true)}
                     >
                       Log in
                     </Button>
@@ -164,15 +160,15 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
       </header>
       {/* Login dialog */}
       <LoginDailog
-        isLoginOpen={isLoginOpen}
-        setLoginOpen={setLoginOpen}
+        isLoginOpen={isLoginDialogOpen}
+        setLoginOpen={setLoginDialogOpen}
         setSignupOpen={setSignupOpen}
       />
       {/* Signup dialog */}
       <SignupDialog
         isSignupOpen={isSignupOpen}
         setSignupOpen={setSignupOpen}
-        setLoginOpen={setLoginOpen}
+        setLoginOpen={setLoginDialogOpen}
       />
     </>
   );

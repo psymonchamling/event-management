@@ -2,6 +2,7 @@ import Header from "@/pages/homepage/components/header";
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import { useState } from "react";
 import type { AuthContextValue } from "@/context/auth-context/auth-context";
+import { LoginDialogContextProvider } from "@/context/login-dialog-context/login-dialog-provider";
 
 const RootLayout = () => {
   const [theme, setTheme] = useState<"light" | "dark">("light");
@@ -11,10 +12,11 @@ const RootLayout = () => {
   };
   return (
     <>
-      <Header theme={theme} onThemeToggle={toggleTheme} />
-
-      <Outlet />
-      {/* <TanStackRouterDevtools /> */}
+      <LoginDialogContextProvider>
+        <Header theme={theme} onThemeToggle={toggleTheme} />
+        <Outlet />
+        {/* <TanStackRouterDevtools /> */}
+      </LoginDialogContextProvider>
     </>
   );
 };

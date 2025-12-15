@@ -3,6 +3,7 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
+  // Basic profile
   name: {
     type: String,
   },
@@ -17,6 +18,23 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please enter a password"],
     minlength: [6, "Minimum password length is 6 characters"],
+  },
+
+  // Additional profile fields (all optional, used in dashboard settings)
+  bio: {
+    type: String,
+  },
+  organization: {
+    type: String,
+  },
+  website: {
+    type: String,
+  },
+  location: {
+    type: String,
+  },
+  timezone: {
+    type: String,
   },
 });
 

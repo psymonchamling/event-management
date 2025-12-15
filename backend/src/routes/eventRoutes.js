@@ -6,6 +6,7 @@ import {
   getMyEvents,
   getMyEventsSummary,
   updateEvent,
+  deleteEvent,
 } from "../controllers/eventController.js";
 import reqireAuth from "../../middleware/authMiddleware.js";
 import { upload } from "../../middleware/upload.js";
@@ -28,9 +29,10 @@ eventRouter.get("/summary/mine", reqireAuth, getMyEventsSummary);
 // PUT /api/events/:id - update an existing event (only by its organizer)
 eventRouter.put("/:id", reqireAuth, upload.single("banner"), updateEvent);
 
+// DELETE /api/events/:id - delete an event (only by its organizer)
+eventRouter.delete("/:id", reqireAuth, deleteEvent);
+
 // GET /api/events/:id - get single event by id (public)
 eventRouter.get("/:id", getEventById);
 
 export default eventRouter;
-
-

@@ -14,9 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useMutation } from "@tanstack/react-query";
-import authAxios from "@/services/authAxios";
-import type { AxiosError } from "axios";
+import useLogout from "@/hooks/useLogout.hook";
 
 export function NavUser({
   user,
@@ -27,28 +25,14 @@ export function NavUser({
     avatar: string;
   };
 }) {
-  const { mutate: logout, isPending: isPendingLogout } = useMutation({
-    mutationFn: () => authAxios.post("/logout", { withCredentials: true }),
-    onSuccess: () => {
-      window.location.href = "/";
-      // handleDialogOnOpenChange(false);
-      // navigate({ to: "/dashboard" });
-    },
-    onError: (err: AxiosError<{ errors?: { email?: string } }>) => {
-      const emailError = err.response?.data?.errors?.email;
-      if (emailError) {
-        // setError("email", { type: "server", message: emailError });
-      }
-      console.error(err);
-    },
-  });
+  const { logout } = useLogout();
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex">
           <Avatar className="h-8 w-8 rounded-lg grayscale">
-            <AvatarImage src={user.avatar} alt={user.name} />
+            <AvatarImage src={user?.avatar} alt={user?.name} />
             <AvatarFallback className="rounded-lg">CN</AvatarFallback>
           </Avatar>
           {/* <div className="grid flex-1 text-left text-sm leading-tight">
@@ -98,7 +82,7 @@ export function NavUser({
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>
           <IconLogout />
-          Log out1
+          Log out
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

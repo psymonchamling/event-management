@@ -495,7 +495,7 @@ export function DataTable({
                                 header.column.columnDef.header,
                                 header.getContext()
                               )}
-                        </TableHead>
+                        </TableHead> 
                       );
                     })}
                   </TableRow>

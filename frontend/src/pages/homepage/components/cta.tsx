@@ -16,9 +16,9 @@ export default function CTA() {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button size="lg" className="px-8">
+            {/* <Button size="lg" className="px-8">
               Create Event Free
-            </Button>
+            </Button> */}
             <Button size="lg" variant="outline" className="px-8 bg-transparent">
               Watch Demo
             </Button>

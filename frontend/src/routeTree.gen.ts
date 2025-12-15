@@ -20,6 +20,7 @@ import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as EventsEventIdRouteImport } from './routes/events/$eventId'
 import { Route as DashboardTeamRouteImport } from './routes/dashboard/team'
 import { Route as DashboardSettingRouteImport } from './routes/dashboard/setting'
+import { Route as DashboardRegistrationRouteImport } from './routes/dashboard/registration'
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
 import { Route as DashboardEventListRouteImport } from './routes/dashboard/event-list'
 import { Route as DashboardEditEventRouteImport } from './routes/dashboard/edit-event'
@@ -80,6 +81,11 @@ const DashboardSettingRoute = DashboardSettingRouteImport.update({
   path: '/setting',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardRegistrationRoute = DashboardRegistrationRouteImport.update({
+  id: '/registration',
+  path: '/registration',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardProjectsRoute = DashboardProjectsRouteImport.update({
   id: '/projects',
   path: '/projects',
@@ -112,6 +118,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
+  '/dashboard/registration': typeof DashboardRegistrationRoute
   '/dashboard/setting': typeof DashboardSettingRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -127,6 +134,7 @@ export interface FileRoutesByTo {
   '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
+  '/dashboard/registration': typeof DashboardRegistrationRoute
   '/dashboard/setting': typeof DashboardSettingRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -145,6 +153,7 @@ export interface FileRoutesById {
   '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
+  '/dashboard/registration': typeof DashboardRegistrationRoute
   '/dashboard/setting': typeof DashboardSettingRoute
   '/dashboard/team': typeof DashboardTeamRoute
   '/events/$eventId': typeof EventsEventIdRoute
@@ -164,6 +173,7 @@ export interface FileRouteTypes {
     | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
+    | '/dashboard/registration'
     | '/dashboard/setting'
     | '/dashboard/team'
     | '/events/$eventId'
@@ -179,6 +189,7 @@ export interface FileRouteTypes {
     | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
+    | '/dashboard/registration'
     | '/dashboard/setting'
     | '/dashboard/team'
     | '/events/$eventId'
@@ -196,6 +207,7 @@ export interface FileRouteTypes {
     | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
+    | '/dashboard/registration'
     | '/dashboard/setting'
     | '/dashboard/team'
     | '/events/$eventId'
@@ -291,6 +303,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardSettingRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/registration': {
+      id: '/dashboard/registration'
+      path: '/registration'
+      fullPath: '/dashboard/registration'
+      preLoaderRoute: typeof DashboardRegistrationRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/projects': {
       id: '/dashboard/projects'
       path: '/projects'
@@ -327,6 +346,7 @@ interface DashboardRouteChildren {
   DashboardEditEventRoute: typeof DashboardEditEventRoute
   DashboardEventListRoute: typeof DashboardEventListRoute
   DashboardProjectsRoute: typeof DashboardProjectsRoute
+  DashboardRegistrationRoute: typeof DashboardRegistrationRoute
   DashboardSettingRoute: typeof DashboardSettingRoute
   DashboardTeamRoute: typeof DashboardTeamRoute
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -337,6 +357,7 @@ const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardEditEventRoute: DashboardEditEventRoute,
   DashboardEventListRoute: DashboardEventListRoute,
   DashboardProjectsRoute: DashboardProjectsRoute,
+  DashboardRegistrationRoute: DashboardRegistrationRoute,
   DashboardSettingRoute: DashboardSettingRoute,
   DashboardTeamRoute: DashboardTeamRoute,
   DashboardIndexRoute: DashboardIndexRoute,
