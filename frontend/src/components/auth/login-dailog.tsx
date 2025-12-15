@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { useAuth } from "@/context/auth-context/auth-context";
 
 type LoginDialogProps = {
   isLoginOpen: boolean;
@@ -48,8 +47,6 @@ const LoginDailog = ({
 }: LoginDialogProps) => {
   const navigate = useNavigate();
 
-  const { refetchUserData } = useAuth();
-
   const {
     register,
     handleSubmit,
@@ -64,7 +61,6 @@ const LoginDailog = ({
     mutationFn: (data: FormData) =>
       axios.post(`${apiUrl}/login`, data, { withCredentials: true }),
     onSuccess: async () => {
-      await refetchUserData();
       handleDialogOnOpenChange(false);
       navigate({ to: "/dashboard" });
     },

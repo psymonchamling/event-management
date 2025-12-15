@@ -3,6 +3,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import authAxios from "@/services/authAxios";
 
 export const Route = createFileRoute("/dashboard/add-event")({
   component: AddEventPage,
@@ -30,10 +31,8 @@ function AddEventPage() {
     location: "",
     price: "",
     capacity: "",
-    bannerUrl: "",
+    bannerFile: null as File | null,
     description: "",
-    organizerName: "",
-    organizerEmail: "",
   });
   const [errors, setErrors] = React.useState<Record<string, string>>({});
 
@@ -46,6 +45,11 @@ function AddEventPage() {
     ) => {
       setForm((prev) => ({ ...prev, [field]: e.target.value }));
     };
+
+  const onBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setForm((prev) => ({ ...prev, bannerFile: file }));
+  };
 
   function validate() {
     const next: Record<string, string> = {};
@@ -60,9 +64,6 @@ function AddEventPage() {
       next.price = "Price cannot be negative";
     if (form.capacity && Number(form.capacity) < 0)
       next.capacity = "Capacity cannot be negative";
-    if (form.organizerEmail && !/^\S+@\S+\.\S+$/.test(form.organizerEmail)) {
-      next.organizerEmail = "Enter a valid email";
-    }
     setErrors(next);
     return Object.keys(next).length === 0;
   }
@@ -72,8 +73,25 @@ function AddEventPage() {
     if (!validate()) return;
     setIsSubmitting(true);
     try {
-      // TODO: Hook up to backend API
-      await new Promise((r) => setTimeout(r, 700));
+      const formData = new FormData();
+      formData.append("title", form.title);
+      formData.append("type", form.type);
+      formData.append("dateTime", form.dateTime);
+      formData.append("venueType", form.venueType);
+      formData.append("location", form.location);
+      formData.append("price", form.price);
+      formData.append("capacity", form.capacity);
+      formData.append("description", form.description);
+
+      if (form.bannerFile) {
+        formData.append("banner", form.bannerFile);
+      }
+
+      await authAxios.post("/api/events", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       navigate({ to: "/dashboard/event-list" });
     } finally {
       setIsSubmitting(false);
@@ -313,12 +331,12 @@ function AddEventPage() {
             </div>
             <div className="md:col-span-2">
               <div className="flex flex-col gap-2">
-              <Label htmlFor="bannerUrl">Banner Image URL</Label>
+              <Label htmlFor="banner">Banner Image</Label>
               <Input
-                id="bannerUrl"
-                placeholder="https://example.com/banner.jpg"
-                  value={form.bannerUrl}
-                  onChange={onChange("bannerUrl")}
+                id="banner"
+                type="file"
+                accept="image/*"
+                onChange={onBannerChange}
               />
               </div>
               <p className="mt-1 text-xs text-muted-foreground">
@@ -350,38 +368,7 @@ function AddEventPage() {
           </div>
         </div>
 
-        <div className="rounded-xl border border-border bg-background p-5 h-fit">
-          <h3 className="text-sm font-semibold text-foreground">Organizer</h3>
-          <div className="mt-3 space-y-3">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="organizerName">Name</Label>
-              <Input
-                id="organizerName"
-                placeholder="Jane Smith"
-                value={form.organizerName}
-                onChange={onChange("organizerName")}
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="organizerEmail">Email</Label>
-              <Input
-                id="organizerEmail"
-                type="email"
-                placeholder="jane@example.com"
-                value={form.organizerEmail}
-                onChange={onChange("organizerEmail")}
-              />
-              {errors.organizerEmail && (
-                <p className="mt-1 text-xs text-red-500">
-                  {errors.organizerEmail}
-                </p>
-              )}
-            </div>
-          </div>
-          <p className="mt-6 text-[11px] text-muted-foreground">
-            Tip: Add a recognizable organizer name and contact email for trust.
-          </p>
-          </div>
+        {/* Organizer info is derived from logged-in user; no manual input needed */}
         </form>
     </div>
   );

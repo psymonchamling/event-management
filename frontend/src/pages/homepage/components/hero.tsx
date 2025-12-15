@@ -5,6 +5,7 @@ import { useNavigate } from "@tanstack/react-router";
 
 export default function Hero() {
   const navigate = useNavigate();
+
   return (
     <section className="w-full py-10 md:py-15 lg:py-20">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

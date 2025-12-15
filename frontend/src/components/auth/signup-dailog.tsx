@@ -47,6 +47,8 @@ type FormData = {
 
 type MutationData = Omit<FormData, "confirmPassword">;
 
+const apiUrl = import.meta.env.VITE_BASE_URL;
+
 const SignupDialog = ({
   isSignupOpen,
   setSignupOpen,
@@ -63,8 +65,6 @@ const SignupDialog = ({
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
-
-  const apiUrl = import.meta.env.VITE_BASE_URL;
 
   const { mutate: mutateForm, isPending: isPendingForm } = useMutation({
     mutationFn: (data: MutationData) =>
