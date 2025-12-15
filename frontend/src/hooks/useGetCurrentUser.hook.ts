@@ -8,14 +8,14 @@ type UserDetailResponse = {
   } | null;
 };
 
-const useGetUserData = () => {
+const useGetCurrentUser = () => {
   const {
     data: userData,
     isFetching: isFetchingUserData,
     refetch: refetchUserData,
   } = useQuery<UserDetailResponse>({
     queryFn: async () => {
-      const res = await authAxios.get<UserDetailResponse>("/api/userdetail");
+      const res = await authAxios<UserDetailResponse>("/api/userdetail");
       return res.data;
     },
     queryKey: ["userDetail"],
@@ -30,4 +30,4 @@ const useGetUserData = () => {
   };
 };
 
-export default useGetUserData;
+export default useGetCurrentUser;

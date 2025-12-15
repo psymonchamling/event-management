@@ -3,6 +3,9 @@ import validator from "validator";
 import bcrypt from "bcrypt";
 
 const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+  },
   email: {
     type: String,
     required: [true, "Please enter a email."],

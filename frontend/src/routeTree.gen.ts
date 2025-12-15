@@ -22,6 +22,7 @@ import { Route as DashboardTeamRouteImport } from './routes/dashboard/team'
 import { Route as DashboardSettingRouteImport } from './routes/dashboard/setting'
 import { Route as DashboardProjectsRouteImport } from './routes/dashboard/projects'
 import { Route as DashboardEventListRouteImport } from './routes/dashboard/event-list'
+import { Route as DashboardEditEventRouteImport } from './routes/dashboard/edit-event'
 import { Route as DashboardAddEventRouteImport } from './routes/dashboard/add-event'
 
 const SignupRoute = SignupRouteImport.update({
@@ -89,6 +90,11 @@ const DashboardEventListRoute = DashboardEventListRouteImport.update({
   path: '/event-list',
   getParentRoute: () => DashboardRoute,
 } as any)
+const DashboardEditEventRoute = DashboardEditEventRouteImport.update({
+  id: '/edit-event',
+  path: '/edit-event',
+  getParentRoute: () => DashboardRoute,
+} as any)
 const DashboardAddEventRoute = DashboardAddEventRouteImport.update({
   id: '/add-event',
   path: '/add-event',
@@ -103,6 +109,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/dashboard/add-event': typeof DashboardAddEventRoute
+  '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
   '/dashboard/setting': typeof DashboardSettingRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/dashboard/add-event': typeof DashboardAddEventRoute
+  '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
   '/dashboard/setting': typeof DashboardSettingRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/dashboard/add-event': typeof DashboardAddEventRoute
+  '/dashboard/edit-event': typeof DashboardEditEventRoute
   '/dashboard/event-list': typeof DashboardEventListRoute
   '/dashboard/projects': typeof DashboardProjectsRoute
   '/dashboard/setting': typeof DashboardSettingRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/dashboard/add-event'
+    | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
     | '/dashboard/setting'
@@ -166,6 +176,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/dashboard/add-event'
+    | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
     | '/dashboard/setting'
@@ -182,6 +193,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/dashboard/add-event'
+    | '/dashboard/edit-event'
     | '/dashboard/event-list'
     | '/dashboard/projects'
     | '/dashboard/setting'
@@ -293,6 +305,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardEventListRouteImport
       parentRoute: typeof DashboardRoute
     }
+    '/dashboard/edit-event': {
+      id: '/dashboard/edit-event'
+      path: '/edit-event'
+      fullPath: '/dashboard/edit-event'
+      preLoaderRoute: typeof DashboardEditEventRouteImport
+      parentRoute: typeof DashboardRoute
+    }
     '/dashboard/add-event': {
       id: '/dashboard/add-event'
       path: '/add-event'
@@ -305,6 +324,7 @@ declare module '@tanstack/react-router' {
 
 interface DashboardRouteChildren {
   DashboardAddEventRoute: typeof DashboardAddEventRoute
+  DashboardEditEventRoute: typeof DashboardEditEventRoute
   DashboardEventListRoute: typeof DashboardEventListRoute
   DashboardProjectsRoute: typeof DashboardProjectsRoute
   DashboardSettingRoute: typeof DashboardSettingRoute
@@ -314,6 +334,7 @@ interface DashboardRouteChildren {
 
 const DashboardRouteChildren: DashboardRouteChildren = {
   DashboardAddEventRoute: DashboardAddEventRoute,
+  DashboardEditEventRoute: DashboardEditEventRoute,
   DashboardEventListRoute: DashboardEventListRoute,
   DashboardProjectsRoute: DashboardProjectsRoute,
   DashboardSettingRoute: DashboardSettingRoute,

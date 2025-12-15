@@ -139,23 +139,6 @@ function EventListPage() {
     };
   }, [query.q]);
 
-  // bannerUrl: "/uploads/1765735993898-636849902.jpg";
-  // capacity: 197;
-  // createdAt: "2025-12-14T18:13:13.920Z";
-  // dateTime: "2025-12-09T20:12:00.000Z";
-  // description: "this is a test";
-  // location: "sdfsfd";
-  // organizerEmail: "safdsaf@d.com";
-  // organizerId: "693d291a0f4aaf02dd9454b2";
-  // organizerName: "me";
-  // price: 10;
-  // title: "test";
-  // type: "Workshop";
-  // updatedAt: "2025-12-14T18:13:13.920Z";
-  // venueType: "In-person";
-  // __v: 0;
-  // _id: "693efe39fc24e382413ddac3";
-
   return (
     <div className="px-4 lg:px-6">
       <section className="py-4">
@@ -221,86 +204,62 @@ function EventListPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(isLoading || isFetching) && !eventList?.events?.length
-            ? Array.from({ length: 6 }).map((_, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-border bg-background overflow-hidden"
-                  aria-hidden="true"
+          {(isLoading || isFetching) && !eventList?.events?.length ? (
+            <CardSkelton />
+          ) : eventList?.events?.length ? (
+            eventList.events.map((event: EventItemType) => {
+              return (
+                <a
+                  key={event._id}
+                  href={`/events/${event._id}`}
+                  aria-label={`View event ${event?.title}`}
+                  className="rounded-xl border border-border bg-background overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 cursor-pointer block"
                 >
-                  <div className="h-40 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative">
-                    <Skeleton className="absolute inset-0" />
-                  </div>
-                  <div className="p-4 flex flex-col gap-3">
-                    <div className="flex items-center justify-between gap-2">
-                      <Skeleton className="h-5 w-32" />
-                      <Skeleton className="h-5 w-16 rounded-md" />
+                  <article>
+                    <div className="h-40 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 relative">
+                      {event.bannerUrl ? (
+                        <img
+                          src={
+                            event.bannerUrl?.startsWith("/uploads/")
+                              ? `${API_BASE_URL}${event.bannerUrl}`
+                              : event.bannerUrl
+                          }
+                          alt={event.title}
+                          className="absolute top-0 left-0 w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "/no-image.svg";
+                          }}
+                        />
+                      ) : null}
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4 rounded-full" />
-                      <Skeleton className="h-4 w-32" />
+                    <div className="p-4 flex flex-col gap-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <h3 className="text-lg font-semibold text-foreground">
+                          {event.title}
+                        </h3>
+                        <span className="text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
+                          {event.type}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4" />
+                        <span>{event.location}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Calendar className="h-4 w-4" />
+                        <span>{event.dateTime}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-4 rounded-full" />
-                      <Skeleton className="h-4 w-24" />
-                    </div>
-                  </div>
-                </div>
-              ))
-            : eventList?.events?.length
-              ? eventList.events.map((event: EventItemType) => {
-                  return (
-                    <a
-                      key={event._id}
-                      // href={`/events/${event._id}`}
-                      aria-label={`View event ${event?.title}`}
-                      className="rounded-xl border border-border bg-background overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 cursor-pointer block"
-                    >
-                      <article>
-                        <div className="h-40 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 relative">
-                          {event.bannerUrl ? (
-                            <img
-                              src={
-                                event.bannerUrl?.startsWith("/uploads/")
-                                  ? `${API_BASE_URL}${event.bannerUrl}`
-                                  : event.bannerUrl
-                              }
-                              alt={event.title}
-                              className="absolute top-0 left-0 w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src =
-                                  "/no-image.svg";
-                              }}
-                            />
-                          ) : null}
-                        </div>
-                        <div className="p-4 flex flex-col gap-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <h3 className="text-lg font-semibold text-foreground">
-                              {event.title}
-                            </h3>
-                            <span className="text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
-                              {event.type}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <MapPin className="h-4 w-4" />
-                            <span>{event.location}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Calendar className="h-4 w-4" />
-                            <span>{event.dateTime}</span>
-                          </div>
-                        </div>
-                      </article>
-                    </a>
-                  );
-                })
-              : (
-                <p className="col-span-full text-center text-sm text-muted-foreground">
-                  No events found.
-                </p>
-                )}
+                  </article>
+                </a>
+              );
+            })
+          ) : (
+            <p className="col-span-full text-center text-sm text-muted-foreground">
+              No events found.
+            </p>
+          )}
         </div>
 
         {/* Pagination */}
@@ -351,3 +310,35 @@ function EventListPage() {
 }
 
 export default EventListPage;
+
+function CardSkelton() {
+  return (
+    <>
+      {Array.from({ length: 6 }).map((_, idx) => (
+        <div
+          key={idx}
+          className="rounded-xl border border-border bg-background overflow-hidden"
+          aria-hidden="true"
+        >
+          <div className="h-40 bg-gradient-to-br from-primary/10 via-accent/5 to-secondary/10 relative">
+            <Skeleton className="absolute inset-0" />
+          </div>
+          <div className="p-4 flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-2">
+              <Skeleton className="h-5 w-32" />
+              <Skeleton className="h-5 w-16 rounded-md" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-32" />
+            </div>
+            <div className="flex items-center gap-2">
+              <Skeleton className="h-4 w-4 rounded-full" />
+              <Skeleton className="h-4 w-24" />
+            </div>
+          </div>
+        </div>
+      ))}
+    </>
+  );
+}

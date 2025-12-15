@@ -6,7 +6,7 @@ import eventRouter from "./routes/eventRoutes.js";
 import cookiePraser from "cookie-parser";
 import cors from "cors";
 import reqireAuth from "../middleware/authMiddleware.js";
-import { getUserDetail } from "./controllers/userController.js";
+import { getUserDetail, getUserByIdPublic } from "./controllers/userController.js";
 import path from "path";
 
 const app = express();
@@ -21,7 +21,11 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use("/uploads", express.static(path.resolve("uploads")));
 
 //Routes
+// Authenticated: current user's details (based on req.userId from auth middleware)
 app.get("/api/userdetail", reqireAuth, getUserDetail);
+
+// Public: get any user's details by ID (no auth required)
+app.get("/api/users/:id", getUserByIdPublic);
 
 app.use(authRouter);
 app.use("/api/events", eventRouter);

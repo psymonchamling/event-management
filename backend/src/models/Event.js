@@ -32,7 +32,22 @@ const eventSchema = new mongoose.Schema(
     },
     capacity: {
       type: Number,
+      default: 0,
       min: 0,
+    },
+    attending: {
+      type: Number,
+      min: 0,
+      default: 0,
+      validate: {
+        validator: function (v) {
+          if (typeof this.capacity !== "number") {
+            return true;
+          }
+          return v <= this.capacity;
+        },
+        message: "Attending cannot exceed capacity",
+      },
     },
     bannerUrl: {
       // Local path or external URL
@@ -61,4 +76,3 @@ const eventSchema = new mongoose.Schema(
 const Event = mongoose.model("event", eventSchema);
 
 export default Event;
-
