@@ -11,10 +11,10 @@ const reqireAuth = (req, res, next) => {
 
   jwt.verify(token, secretKey, (err, decodedToken) => {
     if (err) {
-      console.error({ err });
+      // console.error({ err });
       return res.status(400).json({ err });
     } else {
-      console.log({ decodedToken });
+      // console.log({ decodedToken });
       req.userId = decodedToken?.id;
       next();
     }
