@@ -14,12 +14,6 @@ interface HeaderProps {
   onThemeToggle: () => void;
 }
 
-const testData = {
-  name: "shadcn",
-  email: "m@example.com",
-  avatar: "/avatars/shadcn.jpg",
-};
-
 export default function Header({ theme, onThemeToggle }: HeaderProps) {
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -137,7 +131,7 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
                   )}
                 </Button> */}
                 {isLoggedIn ? (
-                  <NavUser user={testData} />
+                  <NavUser />
                 ) : (
                   <>
                     <Button

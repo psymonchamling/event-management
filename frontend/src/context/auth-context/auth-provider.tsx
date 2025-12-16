@@ -7,6 +7,7 @@ export type UserDetailResponse = {
   user: {
     _id: string;
     email: string;
+    name: string;
   } | null;
 };
 

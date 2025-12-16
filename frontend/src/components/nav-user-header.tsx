@@ -1,10 +1,11 @@
 import {
-  IconCreditCard,
+  IconClipboardList,
+  IconDashboard,
+  IconListDetails,
   IconLogout,
-  IconNotification,
-  IconUserCircle,
+  IconSettings,
 } from "@tabler/icons-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,25 +16,50 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import useLogout from "@/hooks/useLogout.hook";
+import { useAuth } from "@/context/auth-context/auth-context";
+import { extractInitialsConcise } from "@/lib/name-initial";
+import { useNavigate } from "@tanstack/react-router";
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string;
-    email: string;
-    avatar: string;
-  };
-}) {
+const dropdownMenus = [
+  {
+    title: "Dashboard",
+    url: "/dashboard",
+    icon: IconDashboard,
+  },
+  {
+    title: "My Events",
+    url: "/dashboard/event-list",
+    icon: IconListDetails,
+  },
+  {
+    title: "My Registration",
+    url: "/dashboard/registration",
+    icon: IconClipboardList,
+  },
+  {
+    title: "Settings",
+    url: "/dashboard/setting",
+    icon: IconSettings,
+  },
+];
+
+export function NavUser() {
   const { logout } = useLogout();
+  const { userData } = useAuth();
+
+  const navigate = useNavigate();
+
+  const { name: userName = "", email: userEmail = "" } = userData?.user || {};
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <div className="flex">
           <Avatar className="h-8 w-8 rounded-lg grayscale">
-            <AvatarImage src={user?.avatar} alt={user?.name} />
-            <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+            {/* <AvatarImage src={user?.avatar} alt={user?.name} /> */}
+            <AvatarFallback className="rounded-lg">
+              {extractInitialsConcise(userName)}
+            </AvatarFallback>
           </Avatar>
           {/* <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-medium">{user.name}</span>
@@ -53,31 +79,27 @@ export function NavUser({
         <DropdownMenuLabel className="p-0 font-normal">
           <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
             <Avatar className="h-8 w-8 rounded-lg">
-              <AvatarImage src={user.avatar} alt={user.name} />
-              <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+              {/* <AvatarImage src={user.avatar} alt={user.name} /> */}
+              <AvatarFallback className="rounded-lg">
+                {extractInitialsConcise(userName)}
+              </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
-              <span className="truncate font-medium">{user.name}</span>
+              <span className="truncate font-medium">{userName}</span>
               <span className="text-muted-foreground truncate text-xs">
-                {user.email}
+                {userEmail}
               </span>
             </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem>
-            <IconUserCircle />
-            Account
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <IconCreditCard />
-            Billing
-          </DropdownMenuItem>
-          <DropdownMenuItem>
-            <IconNotification />
-            Notifications
-          </DropdownMenuItem>
+          {dropdownMenus.map((item) => (
+            <DropdownMenuItem onClick={() => navigate({ to: item.url })}>
+              <item.icon />
+              {item.title}
+            </DropdownMenuItem>
+          ))}
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={() => logout()}>

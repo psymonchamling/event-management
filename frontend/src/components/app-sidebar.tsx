@@ -20,13 +20,9 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import useLogout from "@/hooks/useLogout.hook";
+import { NavDocuments } from "./nav-documents";
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
+const navData = {
   navMain: [
     {
       title: "Dashboard",
@@ -164,9 +160,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader> */}
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        {/* <NavDocuments items={data.documents} /> */}
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
+        <NavMain items={navData.navMain} />
+        {/* <NavDocuments items={navData.documents} /> */}
+        <NavSecondary items={navData.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter className="flex flex-col gap-2">
         <button
