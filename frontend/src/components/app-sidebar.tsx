@@ -36,7 +36,7 @@ const navData = {
     },
     {
       title: "My Registration",
-      url: "/dashboard/registration",
+      url: "/dashboard/my-registration",
       icon: IconClipboardList,
     },
     // {

@@ -209,9 +209,10 @@ function EventListPage() {
           ) : eventList?.events?.length ? (
             eventList.events.map((event: EventItemType) => {
               return (
-                <a
-                  key={event._id}
-                  href={`/events/${event._id}`}
+                <Link
+                  key={event?._id}
+                  to="/events/$eventId"
+                  params={{ eventId: event?._id }}
                   aria-label={`View event ${event?.title}`}
                   className="rounded-xl border border-border bg-background overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 cursor-pointer block"
                 >
@@ -252,7 +253,7 @@ function EventListPage() {
                       </div>
                     </div>
                   </article>
-                </a>
+                </Link>
               );
             })
           ) : (
@@ -265,35 +266,37 @@ function EventListPage() {
         {/* Pagination */}
         {/* <div className="mt-6 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {filtered.length === 0 ? 0 : start + 1}-
+            Showing {eventList?.events?.length === 0 ? 0 : start + 1}-
             {Math.min(end, filtered.length)} of {filtered.length}
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              disabled={eventList?.page === 1}
               className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
             >
               Prev
             </button>
             <div className="flex items-center gap-1">
-              {Array.from({ length: totalPages }).map((_, i) => {
-                const p = i + 1;
-                const isActive = p === currentPage;
-                return (
-                  <button
-                    key={p}
-                    onClick={() => setPage(p)}
-                    className={`h-8 w-8 rounded-md border text-sm ${
-                      isActive
-                        ? "bg-secondary text-secondary-foreground"
-                        : "bg-background"
-                    }`}
-                  >
-                    {p}
-                  </button>
-                );
-              })}
+              {Array.from({ length: eventList?.totalPages || 0 }).map(
+                (_, i) => {
+                  const p = i + 1;
+                  const isActive = p === eventList?.page;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPage(p)}
+                      className={`h-8 w-8 rounded-md border text-sm ${
+                        isActive
+                          ? "bg-secondary text-secondary-foreground"
+                          : "bg-background"
+                      }`}
+                    >
+                      {p}
+                    </button>
+                  );
+                }
+              )}
             </div>
             <button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}

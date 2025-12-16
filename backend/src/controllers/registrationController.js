@@ -60,7 +60,7 @@ export const getAllRegistratedUserForEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
 
-    const registrations = (await Registration.find({ eventId }))
+    const registrations = await Registration.find({ eventId })
       .populate("userId", "name email")
       .sort({ createdAt: -1 });
 
@@ -79,8 +79,8 @@ export const getAllEventRegisteredByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const events = (await Registration.find({ userId }))
-      .populate("eventId", "title type dateTime location price")
+    const events = await Registration.find({ userId })
+      .populate("eventId", "title type dateTime location price capacity attending bannerUrl")
       .sort({ createdAt: -1 });
 
     return res.status(200).json(events);
@@ -97,10 +97,13 @@ export const getAllEventRegisteredByUser = async (req, res) => {
 export const isUserRegisteredForEvent = async (req, res) => {
   try {
     const { userId, eventId } = req.query;
+    const isUserRegistered = await Registration.findOne({
+      userId,
+      eventId,
+    });
+    console.log({ isUserRegistered, userId, eventId });
 
-    const isRegistered = Registration.findOne({ userId, eventId });
-
-    return res.status(200).json({ isRegistered: Boolean(isRegistered) });
+    return res.status(200).json({ isRegistered: Boolean(isUserRegistered) });
   } catch (err) {
     console.error("Error getting registered event list: ", err);
     res.status(400).json({

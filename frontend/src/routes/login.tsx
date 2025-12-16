@@ -1,17 +1,15 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import React from 'react'
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import React from "react";
 
-export const Route = createFileRoute('/login')({
+export const Route = createFileRoute("/login")({
   component: LoginPage,
-})
+});
 
 function LoginPage() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
   React.useEffect(() => {
-    navigate({ to: '/' })
-  }, [navigate])
+    navigate({ to: "/" });
+  }, [navigate]);
 
-  return null
+  return null;
 }
-
-

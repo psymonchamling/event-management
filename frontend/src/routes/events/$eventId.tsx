@@ -1,9 +1,13 @@
 import { useAuth } from "@/context/auth-context/auth-context";
 import useGetUserById from "@/hooks/useGetUserById.hook";
+import DeleteEventButton from "@/pages/event-detail/components/delete-event-button";
+import EventNotFound from "@/pages/event-detail/components/event-not-found";
+import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skeleton-loader";
+import RegistrationCard from "@/pages/event-detail/components/registration-card";
 import authAxios from "@/services/authAxios";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, MapPin, Users, Heart, Star, ArrowLeft } from "lucide-react";
+import { Calendar, MapPin, Users, Heart, Star } from "lucide-react";
 
 // Use the same base URL as our authenticated API client so /uploads paths
 // resolve against the backend server, not the Vite dev server.
@@ -44,6 +48,33 @@ const events = [
   },
 ];
 
+const reviews = [
+  {
+    id: 1,
+    name: "Sara P.",
+    rating: 5,
+    date: "Jan 2026",
+    comment:
+      "Fantastic event! The sessions were insightful and very well organized.",
+  },
+  {
+    id: 2,
+    name: "Michael R.",
+    rating: 4,
+    date: "Jan 2026",
+    comment:
+      "Great speakers and content. Could use a bit more Q&A time though.",
+  },
+  {
+    id: 3,
+    name: "Priya K.",
+    rating: 5,
+    date: "Dec 2025",
+    comment:
+      "Loved the networking opportunities. Learned a lot and met amazing people.",
+  },
+];
+
 function getEventById(id: string) {
   return events.find((e) => e.id === id);
 }
@@ -51,6 +82,8 @@ function getEventById(id: string) {
 function EventDetailPage() {
   const { eventId } = Route.useParams();
   const { userData } = useAuth();
+
+  const userId: string = userData?.user?._id || "";
 
   const ev = getEventById("1");
 
@@ -64,8 +97,7 @@ function EventDetailPage() {
     enabled: !!eventId,
   });
 
-  const isCurrentUser: boolean =
-    userData?.user?._id === eventDetail?.organizerId;
+  const isCurrentUser: boolean = userId === eventDetail?.organizerId;
 
   const { user: eventOrganizer } = useGetUserById({
     id: eventDetail?.organizerId,
@@ -92,36 +124,6 @@ function EventDetailPage() {
     hour: "2-digit",
     minute: "2-digit",
   });
-  const isAuthed =
-    typeof window !== "undefined" &&
-    localStorage.getItem("isAuthenticated") === "true";
-
-  const reviews = [
-    {
-      id: 1,
-      name: "Sara P.",
-      rating: 5,
-      date: "Jan 2026",
-      comment:
-        "Fantastic event! The sessions were insightful and very well organized.",
-    },
-    {
-      id: 2,
-      name: "Michael R.",
-      rating: 4,
-      date: "Jan 2026",
-      comment:
-        "Great speakers and content. Could use a bit more Q&A time though.",
-    },
-    {
-      id: 3,
-      name: "Priya K.",
-      rating: 5,
-      date: "Dec 2025",
-      comment:
-        "Loved the networking opportunities. Learned a lot and met amazing people.",
-    },
-  ];
 
   const averageRating =
     reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
@@ -357,170 +359,17 @@ function EventDetailPage() {
             </div> */}
           </div>
 
-          <aside className="lg:col-span-1">
-            <div className="rounded-xl border border-border p-5 sticky top-24">
-              <div className="text-2xl font-bold text-foreground">
-                {eventDetail?.price > 0
-                  ? `$${eventDetail.price.toFixed(2)}`
-                  : "Free"}
-              </div>
-              <div className="mt-4 text-sm">
-                <div className="text-muted-foreground">Spaces Available:</div>
-                <div className="font-semibold">{eventDetail?.capacity}</div>
-              </div>
-              {isAuthed ? (
-                <>
-                  {!isCurrentUser && (
-                    <button className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10">
-                      Register Now
-                    </button>
-                  )}
-                </>
-              ) : (
-                <>
-                  <a
-                    href="/login"
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
-                  >
-                    Login to Register
-                  </a>
-                  <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                    You must be logged in to register for this event
-                  </p>
-                </>
-              )}
-            </div>
-          </aside>
+          <RegistrationCard
+            userId={userId}
+            eventId={eventId}
+            eventPrice={eventDetail?.price || 0}
+            eventCapacity={eventDetail?.capacity || 0}
+            isCurrentUser={isCurrentUser}
+          />
         </div>
       </section>
     </main>
-  );
-}
-
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { useNavigate } from "@tanstack/react-router";
-import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
-
-function DeleteEventButton({
-  eventId,
-  eventTitle,
-}: {
-  eventId: string;
-  eventTitle: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const navigate = useNavigate();
-  const mutation = useMutation({
-    mutationFn: async () => {
-      await authAxios.delete(`/api/events/${eventId}`);
-    },
-    onSuccess: () => {
-      setOpen(false);
-      navigate({ to: "/dashboard/event-list" });
-    },
-  });
-
-  return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
-      <AlertDialogTrigger asChild>
-        <button className="rounded-md border border-destructive border-opacity-40 px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 focus:bg-destructive/20 transition">
-          Delete
-        </button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete this event?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Are you sure you want to delete the event
-            <span className="font-semibold"> "{eventTitle}"</span>?
-            <br />
-            This action cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={mutation.isPending}>
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => mutation.mutate()}
-            disabled={mutation.isPending}
-          >
-            {mutation.isPending ? "Deleting..." : "Yes, Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
   );
 }
 
 export default EventDetailPage;
-
-function PageSkeletonLoader() {
-  return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
-        <div className="mb-6 flex items-center gap-2">
-          <div className="h-4 w-20 bg-muted rounded" />
-        </div>
-        <div className="grid lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 flex flex-col gap-6">
-            <div className="h-60 w-full bg-muted rounded-xl" />
-            <div className="flex flex-col gap-5">
-              <div className="h-6 w-1/2 bg-muted rounded" />
-              <div className="h-4 w-1/3 bg-muted rounded mt-2" />
-              <div className="flex gap-3 items-center mt-3">
-                <div className="h-4 w-20 bg-muted rounded" />
-                <div className="h-4 w-28 bg-muted rounded" />
-              </div>
-              <div className="h-20 w-full bg-muted rounded mt-4" />
-            </div>
-            <div>
-              <div className="h-5 w-40 bg-muted rounded mb-6" />
-              <div className="space-y-4">
-                <div className="h-12 w-full bg-muted rounded" />
-                <div className="h-12 w-full bg-muted rounded" />
-              </div>
-            </div>
-          </div>
-          <aside className="lg:col-span-1">
-            <div className="rounded-xl border border-border p-5 sticky top-24 flex flex-col gap-8">
-              <div className="h-8 w-20 bg-muted rounded" />
-              <div className="h-4 w-24 bg-muted rounded" />
-              <div className="h-10 w-full bg-muted rounded" />
-              <div className="h-3 w-1/2 bg-muted rounded mx-auto" />
-            </div>
-          </aside>
-        </div>
-      </section>
-    </main>
-  );
-}
-
-//Event not found
-function EventNotFound() {
-  return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8 py-12">
-        <a
-          href="/events"
-          className="text-sm text-primary hover:underline inline-flex items-center gap-1"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to Events
-        </a>
-        <h1 className="text-2xl font-semibold mt-6">Event not found</h1>
-      </section>
-    </main>
-  );
-}
