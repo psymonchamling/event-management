@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 const secretKey = "Bikash$123@$";
 
-const reqireAuth = (req, res, next) => {
+const requireAuth = (req, res, next) => {
   const token = req.cookies.jwt;
 
   //check json web token exists & is verified
@@ -21,4 +21,4 @@ const reqireAuth = (req, res, next) => {
   });
 };
 
-export default reqireAuth;
+export default requireAuth;

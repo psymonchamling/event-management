@@ -5,7 +5,7 @@ import authRouter from "./routes/authRoutes.js";
 import eventRouter from "./routes/eventRoutes.js";
 import cookiePraser from "cookie-parser";
 import cors from "cors";
-import reqireAuth from "../middleware/authMiddleware.js";
+import requireAuth from "../middleware/authMiddleware.js";
 import {
   getUserDetail,
   getUserByIdPublic,
@@ -13,6 +13,7 @@ import {
   deleteCurrentUser,
 } from "./controllers/userController.js";
 import path from "path";
+import registrationRouter from "./routes/registrationRoutes.js";
 
 const app = express();
 
@@ -27,15 +28,16 @@ app.use("/uploads", express.static(path.resolve("uploads")));
 
 //Routes
 // Authenticated: current user's details (based on req.userId from auth middleware)
-app.get("/api/userdetail", reqireAuth, getUserDetail);
-app.patch("/api/userdetail", reqireAuth, updateUserDetail);
-app.delete("/api/userdetail", reqireAuth, deleteCurrentUser);
+app.get("/api/userdetail", requireAuth, getUserDetail);
+app.patch("/api/userdetail", requireAuth, updateUserDetail);
+app.delete("/api/userdetail", requireAuth, deleteCurrentUser);
 
 // Public: get any user's details by ID (no auth required)
 app.get("/api/users/:id", getUserByIdPublic);
 
 app.use(authRouter);
 app.use("/api/events", eventRouter);
+app.use("/api/registration", requireAuth, registrationRouter);
 
 // 404 handler - must be after all routes
 app.use((req, res, next) => {
