@@ -3,6 +3,7 @@ import useGetUserById from "@/hooks/useGetUserById.hook";
 import DeleteEventButton from "@/pages/event-detail/components/delete-event-button";
 import EventNotFound from "@/pages/event-detail/components/event-not-found";
 import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skeleton-loader";
+import RegisteredUsersList from "@/pages/event-detail/components/registered-user-list";
 import RegistrationCard from "@/pages/event-detail/components/registration-card";
 import authAxios from "@/services/authAxios";
 import { useQuery } from "@tanstack/react-query";
@@ -261,10 +262,24 @@ function EventDetailPage() {
                 </div>
               </div>
             </div>
+            {isCurrentUser && (
+              <div className="mt-8 rounded-xl border border-border p-5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-foreground">
+                    Registered Users
+                  </h3>
+                  <span className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground font-medium">
+                    Only visible to you
+                  </span>
+                </div>
+                <RegisteredUsersList eventId={eventId} />
+              </div>
+            )}
+
             <div className="mt-8 rounded-xl border border-border p-5">
               <div className="flex items-center justify-between gap-4">
                 <h3 className="text-lg font-semibold text-foreground">
-                  Customer Reviews
+                  Customer Reviews (Not functional)
                 </h3>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center">

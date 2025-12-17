@@ -60,11 +60,36 @@ export const getAllRegistratedUserForEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
 
+    //parse pagination parameters with default
+    const page = parseInt(req.query?.page) || 1;
+    const limit = parseInt(req.query?.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalRegistrationCount = await Registration.countDocuments({
+      eventId,
+    });
+
     const registrations = await Registration.find({ eventId })
       .populate("userId", "name email")
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return res.status(200).json(registrations);
+    const totalPages = Math.ceil(totalRegistrationCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return res.status(200).json({
+      registrations,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalRegistrationCount,
+        hasNextPage,
+        hasPrevPage,
+        limit,
+      },
+    });
   } catch (err) {
     console.error("Error getting registration: ", err);
     res.status(400).json({
@@ -80,7 +105,10 @@ export const getAllEventRegisteredByUser = async (req, res) => {
     const { userId } = req.params;
 
     const events = await Registration.find({ userId })
-      .populate("eventId", "title type dateTime location price capacity attending bannerUrl")
+      .populate(
+        "eventId",
+        "title type dateTime location price capacity attending bannerUrl"
+      )
       .sort({ createdAt: -1 });
 
     return res.status(200).json(events);
