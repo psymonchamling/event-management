@@ -4,11 +4,15 @@ import DeleteEventButton from "@/pages/event-detail/components/delete-event-butt
 import EventNotFound from "@/pages/event-detail/components/event-not-found";
 import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skeleton-loader";
 import RegisteredUsersList from "@/pages/event-detail/components/registered-user-list";
-import RegistrationCard from "@/pages/event-detail/components/registration-card";
+import RegistrationCard, {
+  type RegistrationCardHandle,
+} from "@/pages/event-detail/components/registration-card";
 import authAxios from "@/services/authAxios";
+import { decodeBase64ToJSON } from "@/utlis/helper";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, MapPin, Users, Heart, Star } from "lucide-react";
+import { useEffect, useRef } from "react";
 
 // Use the same base URL as our authenticated API client so /uploads paths
 // resolve against the backend server, not the Vite dev server.
@@ -17,37 +21,6 @@ const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetailPage,
 });
-
-const events = [
-  {
-    id: "1",
-    title: "Tech Innovators Summit",
-    dateISO: "2026-01-14T10:00:00Z",
-    location: "San Francisco, CA",
-    type: "Technology",
-    price: 29.99,
-    capacity: 100,
-    attending: 45,
-    organizer: { name: "Jane Smith", email: "jane@example.com" },
-    description:
-      "Learn modern web development with React and Next.js. Best practices, patterns, and live demos included.",
-    imageAlt: "Team collaborating in workshop with presentation on screen",
-  },
-  {
-    id: "2",
-    title: "Design Systems Workshop",
-    dateISO: "2026-01-20T10:00:00Z",
-    location: "Remote",
-    type: "Design",
-    price: 0,
-    capacity: 200,
-    attending: 120,
-    organizer: { name: "Alex Lee", email: "alex@example.com" },
-    description:
-      "Deep dive into scalable design systems with hands-on exercises and case studies.",
-    imageAlt: "Designers discussing components and tokens at whiteboard",
-  },
-];
 
 const reviews = [
   {
@@ -76,19 +49,15 @@ const reviews = [
   },
 ];
 
-function getEventById(id: string) {
-  return events.find((e) => e.id === id);
-}
-
 function EventDetailPage() {
   const { eventId } = Route.useParams();
   const { userData } = useAuth();
+  const queryParams = Route.useSearch();
+
+  const registrationRef = useRef<RegistrationCardHandle | null>(null);
 
   const userId: string = userData?.user?._id || "";
 
-  const ev = getEventById("1");
-
-  // Example of how to fetch this event from the backend if needed:
   const { data: eventDetail, isFetching: isFetchingEventDetail } = useQuery({
     queryFn: async () => {
       const res = await authAxios(`/api/events/${eventId}`);
@@ -97,6 +66,21 @@ function EventDetailPage() {
     queryKey: ["eventDetail", eventId],
     enabled: !!eventId,
   });
+
+  useEffect(() => {
+    if (
+      queryParams &&
+      "data" in queryParams &&
+      queryParams.data &&
+      !isFetchingEventDetail
+    ) {
+      const decodedResponse = decodeBase64ToJSON(queryParams.data as string);
+
+      if (decodedResponse?.status === "COMPLETE" && registrationRef.current) {
+        registrationRef.current?.mutateRegistrationStatus();
+      }
+    }
+  }, [queryParams, isFetchingEventDetail]);
 
   const isCurrentUser: boolean = userId === eventDetail?.organizerId;
 
@@ -225,7 +209,7 @@ function EventDetailPage() {
                     Attendees
                   </span>
                   <span className="text-sm">
-                    {ev.attending}/{ev.capacity}
+                    {/* {ev.attending}/{ev.capacity} */}
                   </span>
                 </div>
               </div>
@@ -380,6 +364,7 @@ function EventDetailPage() {
             eventPrice={eventDetail?.price || 0}
             eventCapacity={eventDetail?.capacity || 0}
             isCurrentUser={isCurrentUser}
+            registrationRef={registrationRef}
           />
         </div>
       </section>

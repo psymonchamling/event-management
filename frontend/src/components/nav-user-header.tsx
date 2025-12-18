@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import useLogout from "@/hooks/useLogout.hook";
 import { useAuth } from "@/context/auth-context/auth-context";
-import { extractInitialsConcise } from "@/lib/name-initial";
+import { extractInitialsConcise } from "@/utlis/name-initial";
 import { useNavigate } from "@tanstack/react-router";
 
 const dropdownMenus = [

@@ -1,8 +1,14 @@
 import { useAuth } from "@/context/auth-context/auth-context";
 import authAxios from "@/services/authAxios";
+import usePayment from "@/services/usePayment";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import type { AxiosError } from "axios";
+import { useImperativeHandle, type RefObject } from "react";
+
+export type RegistrationCardHandle = {
+  mutateRegistrationStatus: () => void;
+};
 
 type RegistrationCardPropsType = {
   userId: string;
@@ -10,6 +16,7 @@ type RegistrationCardPropsType = {
   eventPrice: number;
   eventCapacity: number;
   isCurrentUser: boolean;
+  registrationRef: RefObject<RegistrationCardHandle | null>;
 };
 
 const RegistrationCard = ({
@@ -18,11 +25,13 @@ const RegistrationCard = ({
   eventPrice,
   eventCapacity,
   isCurrentUser,
+  registrationRef,
 }: RegistrationCardPropsType) => {
   const { isLoggedIn } = useAuth();
   const queryClient = useQueryClient();
 
   let isRegistered: boolean = false;
+  const fixedEventPrice: string = eventPrice.toFixed(2);
 
   //Registration check
   const { data: newData } = useQuery({
@@ -36,6 +45,10 @@ const RegistrationCard = ({
   });
 
   isRegistered = Boolean(newData?.isRegistered);
+
+  const { initialPayment, isPaymentProcessing } = usePayment({
+    amount: fixedEventPrice,
+  });
 
   const {
     mutate: mutateRegistrationStatus,
@@ -54,8 +67,6 @@ const RegistrationCard = ({
       queryClient.invalidateQueries({
         queryKey: ["userVerification", userId, eventId],
       });
-      // handleDialogOnOpenChange(false);
-      // navigate({ to: "/dashboard" });
     },
     onError: (err: AxiosError<{ errors?: { email?: string } }>) => {
       console.error(err);
@@ -63,18 +74,20 @@ const RegistrationCard = ({
   });
 
   function handleRegistration() {
-    if (userId && eventId) {
-      mutateRegistrationStatus();
+    if (userId && eventId && !isRegistered && !isCurrentUser && isLoggedIn) {
+      initialPayment();
     }
   }
 
-  console.log({ newData });
+  useImperativeHandle(registrationRef, () => ({
+    mutateRegistrationStatus,
+  }));
 
   return (
     <aside className="lg:col-span-1">
       <div className="rounded-xl border border-border p-5 sticky top-24">
         <div className="text-2xl font-bold text-foreground">
-          {eventPrice > 0 ? `$${eventPrice.toFixed(2)}` : "Free"}
+          {eventPrice > 0 ? `$${fixedEventPrice}` : "Free"}
         </div>
         <div className="mt-4 text-sm">
           <div className="text-muted-foreground">Spaces Available:</div>
@@ -97,9 +110,7 @@ const RegistrationCard = ({
                     onClick={handleRegistration}
                     disabled={isPendingRegistrationStatus}
                   >
-                    {isPendingRegistrationStatus
-                      ? "Registerring..."
-                      : "Register Now"}
+                    {isPaymentProcessing ? "Registerring..." : "Register Now"}
                   </button>
                 )}
               </>
