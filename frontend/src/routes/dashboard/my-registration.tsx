@@ -31,7 +31,7 @@ function RegistrationPage() {
 
   const { userData } = useAuth();
 
-  const userId: string = userData?.user?._id;
+  const userId: string = userData?.user?._id || "";
 
   /* const filtered = React.useMemo(() => {
     return MOCK_REGISTRATIONS.filter((reg) => {
@@ -169,7 +169,7 @@ function RegistrationPage() {
                 >
                   <article
                     key={event?.eventId?._id}
-                    className="flex flex-col justify-between rounded-xl border border-border bg-background overflow-hidden shadow-sm"
+                    // className="flex flex-col justify-between rounded-xl border border-border bg-background overflow-hidden shadow-sm"
                   >
                     <div className="h-40 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 relative">
                       {event?.eventId?.bannerUrl ? (

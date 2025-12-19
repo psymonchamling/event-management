@@ -4,15 +4,14 @@ import DeleteEventButton from "@/pages/event-detail/components/delete-event-butt
 import EventNotFound from "@/pages/event-detail/components/event-not-found";
 import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skeleton-loader";
 import RegisteredUsersList from "@/pages/event-detail/components/registered-user-list";
-import RegistrationCard, {
-  type RegistrationCardHandle,
-} from "@/pages/event-detail/components/registration-card";
+import RegistrationCard from "@/pages/event-detail/components/registration-card";
+import useHandleRegistration from "@/pages/event-detail/hooks/useHandleRegistration.hook";
 import authAxios from "@/services/authAxios";
 import { decodeBase64ToJSON } from "@/utlis/helper";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, MapPin, Users, Heart, Star } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 
 // Use the same base URL as our authenticated API client so /uploads paths
 // resolve against the backend server, not the Vite dev server.
@@ -54,9 +53,12 @@ function EventDetailPage() {
   const { userData } = useAuth();
   const queryParams = Route.useSearch();
 
-  const registrationRef = useRef<RegistrationCardHandle | null>(null);
-
   const userId: string = userData?.user?._id || "";
+
+  const { mutateRegistrationStatus } = useHandleRegistration({
+    userId,
+    eventId,
+  });
 
   const { data: eventDetail, isFetching: isFetchingEventDetail } = useQuery({
     queryFn: async () => {
@@ -76,11 +78,11 @@ function EventDetailPage() {
     ) {
       const decodedResponse = decodeBase64ToJSON(queryParams.data as string);
 
-      if (decodedResponse?.status === "COMPLETE" && registrationRef.current) {
-        registrationRef.current?.mutateRegistrationStatus();
+      if (decodedResponse?.status === "COMPLETE" && mutateRegistrationStatus) {
+        mutateRegistrationStatus();
       }
     }
-  }, [queryParams, isFetchingEventDetail]);
+  }, [queryParams, mutateRegistrationStatus, isFetchingEventDetail]);
 
   const isCurrentUser: boolean = userId === eventDetail?.organizerId;
 
@@ -364,7 +366,6 @@ function EventDetailPage() {
             eventPrice={eventDetail?.price || 0}
             eventCapacity={eventDetail?.capacity || 0}
             isCurrentUser={isCurrentUser}
-            registrationRef={registrationRef}
           />
         </div>
       </section>

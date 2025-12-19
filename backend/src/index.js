@@ -14,6 +14,7 @@ import {
 } from "./controllers/userController.js";
 import path from "path";
 import registrationRouter from "./routes/registrationRoutes.js";
+import userRouter from "./routes/userDetail.js";
 
 const app = express();
 
@@ -26,18 +27,13 @@ app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 // Serve uploaded images statically
 app.use("/uploads", express.static(path.resolve("uploads")));
 
-//Routes
-// Authenticated: current user's details (based on req.userId from auth middleware)
-app.get("/api/userdetail", requireAuth, getUserDetail);
-app.patch("/api/userdetail", requireAuth, updateUserDetail);
-app.delete("/api/userdetail", requireAuth, deleteCurrentUser);
-
 // Public: get any user's details by ID (no auth required)
 app.get("/api/users/:id", getUserByIdPublic);
 
 app.use(authRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/registration", requireAuth, registrationRouter);
+app.use("/api/userdetail", requireAuth, userRouter);
 
 // 404 handler - must be after all routes
 app.use((req, res, next) => {

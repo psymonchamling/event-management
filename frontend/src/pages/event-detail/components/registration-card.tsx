@@ -1,10 +1,8 @@
 import { useAuth } from "@/context/auth-context/auth-context";
 import authAxios from "@/services/authAxios";
 import usePayment from "@/services/usePayment";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
-import type { AxiosError } from "axios";
-import { useImperativeHandle, type RefObject } from "react";
 
 export type RegistrationCardHandle = {
   mutateRegistrationStatus: () => void;
@@ -16,7 +14,6 @@ type RegistrationCardPropsType = {
   eventPrice: number;
   eventCapacity: number;
   isCurrentUser: boolean;
-  registrationRef: RefObject<RegistrationCardHandle | null>;
 };
 
 const RegistrationCard = ({
@@ -25,10 +22,8 @@ const RegistrationCard = ({
   eventPrice,
   eventCapacity,
   isCurrentUser,
-  registrationRef,
 }: RegistrationCardPropsType) => {
   const { isLoggedIn } = useAuth();
-  const queryClient = useQueryClient();
 
   let isRegistered: boolean = false;
   const fixedEventPrice: string = eventPrice.toFixed(2);
@@ -50,38 +45,11 @@ const RegistrationCard = ({
     amount: fixedEventPrice,
   });
 
-  const {
-    mutate: mutateRegistrationStatus,
-    isPending: isPendingRegistrationStatus,
-  } = useMutation({
-    mutationFn: () =>
-      authAxios.post(
-        "/api/registration",
-        {
-          userId,
-          eventId,
-        },
-        { withCredentials: true }
-      ),
-    onSuccess: async () => {
-      queryClient.invalidateQueries({
-        queryKey: ["userVerification", userId, eventId],
-      });
-    },
-    onError: (err: AxiosError<{ errors?: { email?: string } }>) => {
-      console.error(err);
-    },
-  });
-
   function handleRegistration() {
     if (userId && eventId && !isRegistered && !isCurrentUser && isLoggedIn) {
       initialPayment();
     }
   }
-
-  useImperativeHandle(registrationRef, () => ({
-    mutateRegistrationStatus,
-  }));
 
   return (
     <aside className="lg:col-span-1">
@@ -108,7 +76,7 @@ const RegistrationCard = ({
                   <button
                     className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
                     onClick={handleRegistration}
-                    disabled={isPendingRegistrationStatus}
+                    disabled={isPaymentProcessing}
                   >
                     {isPaymentProcessing ? "Registerring..." : "Register Now"}
                   </button>
