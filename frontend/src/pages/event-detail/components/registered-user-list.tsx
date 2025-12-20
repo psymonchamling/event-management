@@ -69,7 +69,7 @@ function RegisteredUsersList({ eventId }: { eventId: string }) {
                       {reg.userId?.email || "N/A"}
                     </td>
                     <td className="px-4 py-3">
-                      <span
+                      {/* <span
                         className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize ${
                           reg.status === "confirmed"
                             ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400"
@@ -79,6 +79,11 @@ function RegisteredUsersList({ eventId }: { eventId: string }) {
                         }`}
                       >
                         {reg.status}
+                      </span> */}
+                      <span
+                        className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium capitalize bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400`}
+                      >
+                        Confirmed
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right text-muted-foreground">
