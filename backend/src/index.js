@@ -11,6 +11,7 @@ import path from "path";
 import registrationRouter from "./routes/registrationRoutes.js";
 import userRouter from "./routes/userDetail.js";
 import { migrateRegistrations } from "./service/migration.js";
+import reviewRouter from "./routes/reviewRoutes.js";
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use(authRouter);
 app.use("/api/events", eventRouter);
 app.use("/api/registration", requireAuth, registrationRouter);
 app.use("/api/userdetail", requireAuth, userRouter);
+app.use("/api/review", requireAuth, reviewRouter);
 
 // 404 handler - must be after all routes
 app.use((req, res, next) => {
