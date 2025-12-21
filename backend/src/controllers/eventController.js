@@ -301,10 +301,7 @@ export const getMyEventsSummary = async (req, res) => {
       { $match: { eventId: { $in: eventIdList } } },
     ]);
 
-    console.log({ allRegistrationListOfMyEvents });
-
     const totalRegistrations = allRegistrationListOfMyEvents?.length || 0;
-
     const totalRevenue = allRegistrationListOfMyEvents.reduce((sum, ev) => {
       return sum + ev?.price || 0;
     }, 0);
