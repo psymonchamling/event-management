@@ -3,6 +3,7 @@ import useGetUserById from "@/hooks/useGetUserById.hook";
 import DeleteEventButton from "@/pages/event-detail/components/delete-event-button";
 import EventNotFound from "@/pages/event-detail/components/event-not-found";
 import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skeleton-loader";
+import EventReviewSection from "@/pages/event-detail/components/event-review-section";
 import RegisteredUsersList from "@/pages/event-detail/components/registered-user-list";
 import RegistrationCard from "@/pages/event-detail/components/registration-card";
 import useHandleRegistration from "@/pages/event-detail/hooks/useHandleRegistration.hook";
@@ -10,7 +11,7 @@ import authAxios from "@/services/authAxios";
 import { decodeBase64ToJSON } from "@/utlis/helper";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { Calendar, MapPin, Users, Heart, Star } from "lucide-react";
+import { Calendar, MapPin, Users, Heart } from "lucide-react";
 import { useEffect } from "react";
 
 // Use the same base URL as our authenticated API client so /uploads paths
@@ -20,33 +21,6 @@ const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
 export const Route = createFileRoute("/events/$eventId")({
   component: EventDetailPage,
 });
-
-const reviews = [
-  {
-    id: 1,
-    name: "Sara P.",
-    rating: 5,
-    date: "Jan 2026",
-    comment:
-      "Fantastic event! The sessions were insightful and very well organized.",
-  },
-  {
-    id: 2,
-    name: "Michael R.",
-    rating: 4,
-    date: "Jan 2026",
-    comment:
-      "Great speakers and content. Could use a bit more Q&A time though.",
-  },
-  {
-    id: 3,
-    name: "Priya K.",
-    rating: 5,
-    date: "Dec 2025",
-    comment:
-      "Loved the networking opportunities. Learned a lot and met amazing people.",
-  },
-];
 
 function EventDetailPage() {
   const { eventId } = Route.useParams();
@@ -111,9 +85,6 @@ function EventDetailPage() {
     hour: "2-digit",
     minute: "2-digit",
   });
-
-  const averageRating =
-    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   return (
     <main className="min-h-screen bg-background">
@@ -262,62 +233,7 @@ function EventDetailPage() {
               </div>
             )}
 
-            <div className="mt-8 rounded-xl border border-border p-5">
-              <div className="flex items-center justify-between gap-4">
-                <h3 className="text-lg font-semibold text-foreground">
-                  Customer Reviews (Not functional)
-                </h3>
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-4 w-4 ${
-                          i < Math.round(averageRating)
-                            ? "text-yellow-500 fill-yellow-500"
-                            : "text-muted-foreground"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-sm text-muted-foreground">
-                    {averageRating.toFixed(1)} / 5.0
-                  </span>
-                </div>
-              </div>
-              <div className="mt-4 grid gap-4 sm:grid-cols-2">
-                {reviews.map((rev) => (
-                  <div
-                    key={rev.id}
-                    className="rounded-lg border border-border p-4 bg-background"
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-foreground">
-                        {rev.name}
-                      </div>
-                      <div className="flex items-center">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`h-3.5 w-3.5 ${
-                              i < rev.rating
-                                ? "text-yellow-500 fill-yellow-500"
-                                : "text-muted-foreground"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      {rev.date}
-                    </div>
-                    <p className="mt-2 text-sm text-foreground leading-relaxed">
-                      {rev.comment}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <EventReviewSection />
 
             {/* Similar event */}
             {/* <div className="mt-8">
