@@ -6,15 +6,11 @@ import eventRouter from "./routes/eventRoutes.js";
 import cookiePraser from "cookie-parser";
 import cors from "cors";
 import requireAuth from "../middleware/authMiddleware.js";
-import {
-  getUserDetail,
-  getUserByIdPublic,
-  updateUserDetail,
-  deleteCurrentUser,
-} from "./controllers/userController.js";
+import { getUserByIdPublic } from "./controllers/userController.js";
 import path from "path";
 import registrationRouter from "./routes/registrationRoutes.js";
 import userRouter from "./routes/userDetail.js";
+import { migrateRegistrations } from "./service/migration.js";
 
 const app = express();
 
@@ -60,6 +56,7 @@ async function startServerWithDatabase() {
     app.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`); // Added ${PORT}
     });
+    // migrateRegistrations();
   } catch (error) {}
 }
 

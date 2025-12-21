@@ -26,6 +26,11 @@ const registrationSchema = new mongoose.Schema(
       enum: ["unpaid", "paid", "refunded"],
       default: "unpaid",
     },
+    price: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
     notes: String,
   },
   { timestamps: true }

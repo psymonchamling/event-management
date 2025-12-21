@@ -1,4 +1,5 @@
 import Event from "../models/Event.js";
+import Registration from "../models/Registration.js";
 
 // Create a new event (protected)
 export const createEvent = async (req, res) => {
@@ -200,12 +201,16 @@ export const deleteEvent = async (req, res) => {
     }
     const event = await Event.findOneAndDelete({ _id: eventId, organizerId });
     if (!event) {
-      return res.status(404).json({ message: "Event not found or access denied" });
+      return res
+        .status(404)
+        .json({ message: "Event not found or access denied" });
     }
     return res.status(200).json({ message: "Event deleted successfully" });
   } catch (err) {
     console.error("Error deleting event:", err);
-    return res.status(400).json({ message: "Failed to delete event", error: err.message });
+    return res
+      .status(400)
+      .json({ message: "Failed to delete event", error: err.message });
   }
 };
 
@@ -281,9 +286,10 @@ export const getMyEventsSummary = async (req, res) => {
     }
 
     const events = await Event.find({ organizerId });
-    const now = new Date();
-
     const totalEvents = events.length;
+    const eventIdList = events.map((ev) => ev._id);
+
+    const now = new Date();
     const upcomingEvents = events.filter(
       (ev) => ev.dateTime && ev.dateTime >= now
     ).length;
@@ -291,16 +297,16 @@ export const getMyEventsSummary = async (req, res) => {
       (ev) => ev.dateTime && ev.dateTime < now
     ).length;
 
-    const totalRegistrations = events.reduce(
-      (sum, ev) => sum + (typeof ev.attending === "number" ? ev.attending : 0),
-      0
-    );
+    const allRegistrationListOfMyEvents = await Registration.aggregate([
+      { $match: { eventId: { $in: eventIdList } } },
+    ]);
 
-    const totalRevenue = events.reduce((sum, ev) => {
-      const attending =
-        typeof ev.attending === "number" ? ev.attending : 0;
-      const price = typeof ev.price === "number" ? ev.price : 0;
-      return sum + attending * price;
+    console.log({ allRegistrationListOfMyEvents });
+
+    const totalRegistrations = allRegistrationListOfMyEvents?.length || 0;
+
+    const totalRevenue = allRegistrationListOfMyEvents.reduce((sum, ev) => {
+      return sum + ev?.price || 0;
     }, 0);
 
     return res.status(200).json({
@@ -318,4 +324,3 @@ export const getMyEventsSummary = async (req, res) => {
     });
   }
 };
-

@@ -44,6 +44,7 @@ export const registerForEvent = async (req, res) => {
       userId,
       eventId,
       status: "pending",
+      price: event?.price || 0,
     });
     return res.status(201).json({ newRegistration });
   } catch (err) {
@@ -129,9 +130,11 @@ export const isUserRegisteredForEvent = async (req, res) => {
       userId,
       eventId,
     });
-    console.log("Check Status:", { isUserRegistered: !!isUserRegistered, userId, eventId });
 
-    res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.set(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate"
+    );
     return res.status(200).json({ isRegistered: Boolean(isUserRegistered) });
   } catch (err) {
     console.error("Error getting registered event list: ", err);
