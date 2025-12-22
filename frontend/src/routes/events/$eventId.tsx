@@ -233,7 +233,7 @@ function EventDetailPage() {
               </div>
             )}
 
-            <EventReviewSection />
+            <EventReviewSection isCurrentUser={isCurrentUser} />
 
             {/* Similar event */}
             {/* <div className="mt-8">

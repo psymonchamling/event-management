@@ -1,45 +1,50 @@
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Route } from "@/routes/events/$eventId";
+import authAxios from "@/services/authAxios";
+import { useQuery } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { useMemo, useState } from "react";
+import EventReviewCommentSection from "./event-review-comment-section";
 
-const reviews = [
-  {
-    id: 1,
-    name: "Sara P.",
-    rating: 5,
-    date: "Jan 2026",
-    comment:
-      "Fantastic event! The sessions were insightful and very well organized.",
-  },
-  {
-    id: 2,
-    name: "Michael R.",
-    rating: 4,
-    date: "Jan 2026",
-    comment:
-      "Great speakers and content. Could use a bit more Q&A time though.",
-  },
-  {
-    id: 3,
-    name: "Priya K.",
-    rating: 5,
-    date: "Dec 2025",
-    comment:
-      "Loved the networking opportunities. Learned a lot and met amazing people.",
-  },
-];
+type ReviewType = {
+  _id: string;
+  eventId: string;
+  reviewerId: string;
+  reviewerName: string;
+  rating: number;
+  review: string;
+  createdAt: string;
+  updatedAt: string;
+};
 
-const EventReviewSection = () => {
-  const [newComment, setNewComment] = useState("");
-  const [selectedRating, setSelectedRating] = useState(5);
+const EventReviewSection = ({ isCurrentUser }: { isCurrentUser: boolean }) => {
+  const { eventId } = Route.useParams();
   const [writeReview, setWriteReview] = useState<boolean>(false);
+
+  const {
+    data: reviewData,
+    isFetching: isFetchingReviewData,
+    refetch: refetchReviews,
+  } = useQuery({
+    queryFn: () => authAxios(`/api/review/${eventId}`).then((res) => res.data),
+    queryKey: ["reviews", eventId],
+    enabled: Boolean(eventId),
+  });
 
   const averageRating = useMemo(
     () =>
-      reviews.length > 0
-        ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+      reviewData?.length > 0
+        ? reviewData.reduce((sum: number, r: ReviewType) => sum + r.rating, 0) /
+          reviewData.length
         : 0,
-    [reviews]
+    [reviewData]
   );
+
+  function handleReviewSubmissionSuccess() {
+    refetchReviews();
+    setWriteReview(false);
+  }
 
   return (
     <div className="mt-8 rounded-xl border border-border p-5 space-y-6">
@@ -53,7 +58,7 @@ const EventReviewSection = () => {
             Share your thoughts about this event
           </p>
         </div>
-        {reviews.length > 0 && (
+        {reviewData?.length > 0 && (
           <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-border/50">
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -74,22 +79,49 @@ const EventReviewSection = () => {
         )}
       </div>
 
+      {/* Write a review section */}
+      {!isCurrentUser && (
+        <>
+          {!writeReview ? (
+            <Button
+              size="lg"
+              className="w-full rounded-lg "
+              onClick={() => setWriteReview(true)}
+            >
+              Write a review
+            </Button>
+          ) : (
+            <EventReviewCommentSection
+              handleReviewSubmissionSuccess={handleReviewSubmissionSuccess}
+            />
+          )}
+        </>
+      )}
+
       {/* Reviews list */}
-      {reviews.length > 0 ? (
+      {isFetchingReviewData ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {reviews.map((rev) => (
+          {Array.from({ length: 4 }).map((_, i) => (
+            <ReviewSkeleton key={i} />
+          ))}
+        </div>
+      ) : reviewData?.length > 0 ? (
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
+          {reviewData.map((review: ReviewType) => (
             <div
-              key={rev.id}
+              key={review?._id}
               className="group rounded-lg border border-border p-4 bg-background transition-colors hover:border-primary/20"
             >
               <div className="flex items-center justify-between">
-                <div className="font-medium text-foreground">{rev.name}</div>
+                <div className="font-medium text-foreground">
+                  {review?.reviewerName || "N/A"}
+                </div>
                 <div className="flex items-center gap-0.5">
                   {Array.from({ length: 5 }).map((_, i) => (
                     <Star
                       key={i}
                       className={`h-3 w-3 ${
-                        i < rev.rating
+                        i < review.rating
                           ? "text-yellow-500 fill-yellow-500"
                           : "text-muted-foreground/20"
                       }`}
@@ -98,10 +130,10 @@ const EventReviewSection = () => {
                 </div>
               </div>
               <div className="mt-1 text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">
-                {rev.date}
+                {review?.createdAt}
               </div>
               <p className="mt-2 text-sm text-foreground/80 leading-relaxed line-clamp-3">
-                {rev.comment}
+                {review?.review}
               </p>
             </div>
           ))}
@@ -119,60 +151,28 @@ const EventReviewSection = () => {
           </p>
         </div>
       )}
-
-      {/* Write a review section */}
-      {!writeReview ? (
-        <button
-          onClick={() => setWriteReview(true)}
-          className="w-full rounded-lg border border-border bg-background py-2.5 text-sm font-medium text-foreground transition-all hover:bg-secondary/50 active:scale-95"
-        >
-          Click to Write Review
-        </button>
-      ) : (
-        <div className="group relative rounded-xl border border-border bg-secondary/10 p-4 transition-all hover:bg-secondary/20">
-          <div className="flex flex-col gap-4">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-foreground">
-                Write a review
-              </span>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => setSelectedRating(i + 1)}
-                    className="transition-transform hover:scale-110 active:scale-95"
-                  >
-                    <Star
-                      className={`h-4 w-4 ${
-                        i < selectedRating
-                          ? "text-yellow-500 fill-yellow-500"
-                          : "text-muted-foreground/30"
-                      }`}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <textarea
-                placeholder="Leave a comment..."
-                value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                className="min-h-[40px] w-full resize-none rounded-lg border border-border bg-background p-3 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
-              />
-              <button
-                className="flex min-h-[40px] w-[100px] flex-shrink-0 items-center justify-center rounded-lg bg-primary text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 hover:shadow active:scale-95 disabled:pointer-events-none disabled:opacity-50"
-                disabled={!newComment.trim()}
-              >
-                Post
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default EventReviewSection;
+
+function ReviewSkeleton() {
+  return (
+    <div className="rounded-lg border border-border p-4 bg-background">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-4 w-24" />
+        <div className="flex gap-0.5">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <Skeleton key={i} className="h-3 w-3 rounded-full" />
+          ))}
+        </div>
+      </div>
+      <Skeleton className="mt-2 h-3 w-16" />
+      <div className="mt-3 space-y-2">
+        <Skeleton className="h-3 w-full" />
+        <Skeleton className="h-3 w-3/4" />
+      </div>
+    </div>
+  );
+}

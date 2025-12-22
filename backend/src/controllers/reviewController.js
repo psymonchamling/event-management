@@ -24,10 +24,10 @@ export const addReviewToEvent = async (req, res) => {
   }
 
   try {
-    const newReview = Review.create({
+    const newReview = await Review.create({
       eventId,
       reviewerId: reviewerId,
-      reviewerName: reviewerId?.name || "N/A",
+      reviewerName: reviewer?.name || "N/A",
       rating,
       review,
     });
