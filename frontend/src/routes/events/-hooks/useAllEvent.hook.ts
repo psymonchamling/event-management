@@ -2,6 +2,7 @@ import authAxios from "@/services/authAxios";
 import { useQuery } from "@tanstack/react-query";
 import { useReducer, useState, useEffect } from "react";
 
+const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
 const DEFAULT_LIMI_PER_PAGE = 10;
 
 type PublicEvent = {
@@ -22,16 +23,6 @@ type PublicEventListResponse = {
     totalPages: number;
   };
 };
-
-type EventQueryParams = {
-  time: string;
-  search?: string;
-  type?: string;
-  page: number;
-  limit: number;
-};
-
-const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
 
 const initialState = {
   search: "",
@@ -59,7 +50,7 @@ type ActionType =
   | { type: "DECREASE_PAGE" };
 
 function queryReducer(state: QueryType, action: ActionType) {
-  switch (action.type) {
+  switch (action?.type) {
     case ACTION.SET_QUERY:
       return { ...state, search: action?.payload || "", page: 1 };
     case ACTION.SET_TYPE:
@@ -89,9 +80,9 @@ const useAllEvent = () => {
   } = useQuery<PublicEventListResponse>({
     queryKey: ["publicEvents"],
     queryFn: () =>
-      authAxios<PublicEventListResponse>("/api/events", {
-        params: getParams(),
-      }).then((res) => res.data),
+      authAxios<PublicEventListResponse>(`/api/events?${getParams()}`).then(
+        (res) => res.data
+      ),
   });
 
   const eventList = publicEventData?.events;
@@ -124,19 +115,15 @@ const useAllEvent = () => {
   }, []);
 
   function getParams() {
-    const finalParams: EventQueryParams = {
+    const finalParams = new URLSearchParams({
       time: "latest",
-      page: query.page,
-      limit: DEFAULT_LIMI_PER_PAGE,
-    };
-    if (deferredSearch) {
-      finalParams.search = deferredSearch;
-    }
-    if (query.eventType) {
-      finalParams.type = query.eventType;
-    }
+      page: query.page.toString(),
+      limit: DEFAULT_LIMI_PER_PAGE.toString(),
+      ...(deferredSearch && { search: deferredSearch }),
+      ...(query?.eventType && { type: query.eventType }),
+    });
 
-    return finalParams;
+    return finalParams.toString();
   }
 
   return {

@@ -55,7 +55,7 @@ function EventsIndexPage() {
               value={query.search}
               onChange={(e) =>
                 queryDispatch({
-                  type: ACTION.CHANGE_SEARCH,
+                  type: ACTION.SET_QUERY,
                   payload: e.target.value,
                 })
               }
@@ -68,7 +68,7 @@ function EventsIndexPage() {
               value={query.eventType}
               onChange={(e) =>
                 queryDispatch({
-                  type: ACTION.CHANGE_EVENTTYPE,
+                  type: ACTION.SET_TYPE,
                   payload: e.target.value,
                 })
               }
@@ -202,8 +202,8 @@ function EventsIndexPage() {
                         key={p}
                         onClick={() =>
                           queryDispatch({
-                            type: ACTION.CHANGE_PAGE,
-                            payload: p.toString(),
+                            type: ACTION.SET_PAGE,
+                            payload: p,
                           })
                         }
                         className={`h-8 w-8 rounded-md border text-sm ${
