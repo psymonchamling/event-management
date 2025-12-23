@@ -104,38 +104,71 @@ export const getAllRegistratedUserForEvent = async (req, res) => {
 export const getAllEventRegisteredByUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    const {
+      time = "latest",
+      search = "",
+      type = "",
+      page = "1",
+      limit = "10",
+    } = req.query;
 
-    //parse pagination parameters with defaults
-    const page = parseInt(req.query?.page) || 1;
-    const limit = parseInt(req.query?.limit) || 10;
-    const skip = (page - 1) * limit;
+    const filter = { userId };
 
-    const totalRegistrationCount = await Registration.countDocuments({
-      userId,
-    });
+    // Find matching event IDs based on search and type
+    const eventFilter = {};
+    if (search && typeof search === "string" && search.trim()) {
+      eventFilter.title = { $regex: search.trim(), $options: "i" };
+    }
+    if (type && typeof type === "string" && type.trim() && type !== "All") {
+      eventFilter.type = type.trim();
+    }
 
-    const events = await Registration.find({ userId })
-      .populate(
-        "eventId",
-        "title type dateTime location price capacity attending bannerUrl"
-      )
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    if (Object.keys(eventFilter).length > 0) {
+      const matchingEvents = await Event.find(eventFilter).select("_id");
+      filter.eventId = { $in: matchingEvents.map((event) => event._id) };
+    }
 
-    const totalPages = Math.ceil(totalRegistrationCount / limit);
-    const hasNextPage = page < totalPages;
-    const hasPrevPage = page > 1;
+    // Sorting by registration date as default
+    let sort = { registrationDate: -1 };
+    if (time === "oldest") {
+      sort = { registrationDate: 1 };
+    }
+
+    const pageNumber = Math.max(
+      parseInt(typeof page === "string" ? page : String(page || "1"), 10) || 1,
+      1
+    );
+    const pageSize = Math.max(
+      parseInt(typeof limit === "string" ? limit : String(limit || "10"), 10) ||
+        10,
+      1
+    );
+    const skip = (pageNumber - 1) * pageSize;
+
+    const [totalRegistrationCount, events] = await Promise.all([
+      Registration.countDocuments(filter),
+      Registration.find(filter)
+        .populate(
+          "eventId",
+          "title type dateTime location price capacity attending bannerUrl"
+        )
+        .sort(sort)
+        .skip(skip)
+        .limit(pageSize),
+    ]);
+    console.log("query", req.query, filter, totalRegistrationCount);
+
+    const totalPages = Math.ceil(totalRegistrationCount / pageSize) || 1;
 
     return res.status(200).json({
       events,
       pagination: {
-        currentPage: page,
+        page: pageNumber,
+        limit: pageSize,
+        total: totalRegistrationCount,
         totalPages,
-        totalRegistrationCount,
-        hasNextPage,
-        hasPrevPage,
-        limit,
+        hasNextPage: pageNumber < totalPages,
+        hasPrevPage: pageNumber > 1,
       },
     });
   } catch (err) {
