@@ -1,6 +1,6 @@
 import authAxios from "@/services/authAxios";
 import { useQuery } from "@tanstack/react-query";
-import { useReducer, useState, useEffect } from "react";
+import { useReducer, useState, useEffect, useCallback } from "react";
 
 const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
 const DEFAULT_LIMI_PER_PAGE = 10;
@@ -92,6 +92,7 @@ const useAllEvent = () => {
     total: totalEvents = 0,
     totalPages = 1,
   } = publicEventData?.pagination || {};
+  
   const start = (currentPage - 1) * perPageLimit;
   const end = start + perPageLimit;
 
@@ -114,7 +115,7 @@ const useAllEvent = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
-  function getParams() {
+  const getParams = useCallback(() => {
     const finalParams = new URLSearchParams({
       time: "latest",
       page: query.page.toString(),
@@ -124,7 +125,7 @@ const useAllEvent = () => {
     });
 
     return finalParams.toString();
-  }
+  }, [query, deferredSearch]);
 
   return {
     API_BASE_URL,

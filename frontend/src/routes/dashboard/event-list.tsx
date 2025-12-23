@@ -22,10 +22,12 @@ type EventItemType = {
 
 type EventListResponse = {
   events: EventItemType[];
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 };
 
 // Initial state
@@ -44,6 +46,8 @@ const ACTIONS = {
   SET_TIME: "SET_TIME",
   SET_PAGE: "SET_PAGE",
   SET_LIMIT: "SET_LIMIT",
+  INCREASE_PAGE: "INCREASE_PAGE",
+  DECREASE_PAGE: "DECREASE_PAGE",
   RESET: "RESET",
 } as const;
 
@@ -55,6 +59,8 @@ type ActionType =
   | { type: "SET_TYPE"; payload: string }
   | { type: "SET_TIME"; payload: string }
   | { type: "SET_PAGE"; payload: number }
+  | { type: "INCREASE_PAGE" }
+  | { type: "DECREASE_PAGE" }
   | { type: "SET_LIMIT"; payload: number };
 
 // Reducer function
@@ -72,6 +78,12 @@ const queryReducer = (state: StateType, action: ActionType) => {
     case ACTIONS.SET_PAGE:
       return { ...state, page: action.payload };
 
+    case ACTIONS.INCREASE_PAGE:
+      return { ...state, page: state.page + 1 };
+
+    case ACTIONS.DECREASE_PAGE:
+      return { ...state, page: state.page - 1 };
+
     case ACTIONS.SET_LIMIT:
       return { ...state, limit: action.payload };
 
@@ -80,48 +92,64 @@ const queryReducer = (state: StateType, action: ActionType) => {
   }
 };
 
-function generateQuery(query: StateType) {
-  const url: string = "/api/events/mine";
+function getParams({
+  query,
+  deferredSearch,
+}: {
+  query: StateType;
+  deferredSearch: string;
+}) {
+  const finalParams = new URLSearchParams({
+    time: "latest",
+    page: query.page.toString(),
+    limit: query.limit.toString(),
+    ...(deferredSearch && { search: deferredSearch }),
+    ...(query.type && { type: query.type }),
+  });
 
-  const entriesArray = Object.entries(query);
-  let queryString: string = entriesArray.reduce((acc, arr) => {
-    if (arr[1]) {
-      return acc + `${arr[0]}=${arr[1]}&`;
-    }
-    return acc;
-  }, "");
-
-  queryString = queryString.slice(0, -1);
-
-  if (queryString) {
-    return url + "?" + queryString;
-  }
-
-  return url;
+  return finalParams.toString();
 }
+
+//for pagination
+const minimumNumberOfButton = 6;
+const numberOfButtonEachSide = 2;
 
 function EventListPage() {
   const [query, dispatchQuery] = useReducer(
     queryReducer,
     initialState as StateType
   );
-  const [debouncedSearch, setDebouncedSearch] = useState<string>(query.search);
+  const [deferredSearch, setdeferredSearch] = useState<string>(query.search);
 
   const {
-    data: eventList,
+    data: eventData,
     refetch: refetchEventList,
     isLoading,
     isFetching,
   } = useQuery<EventListResponse>({
-    queryFn: () => authAxios(generateQuery(query)).then((data) => data?.data),
+    queryFn: () =>
+      authAxios(
+        `/api/events/mine?${getParams({ query, deferredSearch })}`
+      ).then((data) => data?.data),
     queryKey: ["eventList", "mine"],
   });
+
+  const eventList = eventData?.events || [];
+  const {
+    page: currentPage = 1,
+    limit: perPageLimit = 10,
+    total: totalEvents = 0,
+    totalPages = 1,
+  } = eventData?.pagination || {};
+
+  const start = (currentPage - 1) * perPageLimit;
+  const end = start + perPageLimit;
 
   useEffect(() => {
     refetchEventList();
   }, [
     refetchEventList,
-    debouncedSearch,
+    deferredSearch,
     query.time,
     query.limit,
     query.page,
@@ -130,7 +158,7 @@ function EventListPage() {
 
   useEffect(() => {
     const timerRef = setTimeout(() => {
-      setDebouncedSearch(query.search);
+      setdeferredSearch(query.search);
     }, 500);
 
     return () => clearTimeout(timerRef);
@@ -201,10 +229,10 @@ function EventListPage() {
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {(isLoading || isFetching) && !eventList?.events?.length ? (
+          {(isLoading || isFetching) && !eventList?.length ? (
             <CardSkelton />
-          ) : eventList?.events?.length ? (
-            eventList.events.map((event: EventItemType) => {
+          ) : eventList?.length ? (
+            eventList.map((event: EventItemType) => {
               return (
                 <Link
                   key={event?._id}
@@ -261,49 +289,61 @@ function EventListPage() {
         </div>
 
         {/* Pagination */}
-        {/* <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
-            Showing {eventList?.events?.length === 0 ? 0 : start + 1}-
-            {Math.min(end, filtered.length)} of {filtered.length}
+            Showing {eventList?.length === 0 ? 0 : start + 1}-
+            {Math.min(end, totalEvents)} of {totalEvents}
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setPage((p) => Math.max(1, p - 1))}
-              disabled={eventList?.page === 1}
+              onClick={() => dispatchQuery({ type: ACTIONS.DECREASE_PAGE })}
+              disabled={currentPage === 1}
               className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
             >
               Prev
             </button>
             <div className="flex items-center gap-1">
-              {Array.from({ length: eventList?.totalPages || 0 }).map(
-                (_, i) => {
-                  const p = i + 1;
-                  const isActive = p === eventList?.page;
-                  return (
-                    <button
-                      key={p}
-                      onClick={() => setPage(p)}
-                      className={`h-8 w-8 rounded-md border text-sm ${
-                        isActive
-                          ? "bg-secondary text-secondary-foreground"
-                          : "bg-background"
-                      }`}
-                    >
-                      {p}
-                    </button>
-                  );
+              {Array.from({ length: totalPages }).map((_, i) => {
+                const p = i + 1;
+                const isActive = p === currentPage;
+
+                if (
+                  totalPages > minimumNumberOfButton &&
+                  p > 2 &&
+                  p <= totalPages - numberOfButtonEachSide
+                ) {
+                  return "...";
                 }
-              )}
+
+                return (
+                  <button
+                    key={p}
+                    onClick={() =>
+                      dispatchQuery({
+                        type: ACTIONS.SET_PAGE,
+                        payload: p,
+                      })
+                    }
+                    className={`h-8 w-8 rounded-md border text-sm ${
+                      isActive
+                        ? "bg-secondary text-secondary-foreground"
+                        : "bg-background"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                );
+              })}
             </div>
             <button
-              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => dispatchQuery({ type: ACTIONS.INCREASE_PAGE })}
+              disabled={currentPage >= totalPages}
               className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
             >
               Next
             </button>
           </div>
-        </div> */}
+        </div>
       </section>
     </div>
   );
