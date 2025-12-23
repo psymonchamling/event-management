@@ -26,7 +26,6 @@ export function NavSecondary({
 
   const checkIsActive = React.useCallback(
     (url: string) => {
-      // console.log({ url, pathname });
       return pathname === url;
     },
     [pathname]

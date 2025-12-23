@@ -105,14 +105,39 @@ export const getAllEventRegisteredByUser = async (req, res) => {
   try {
     const { userId } = req.params;
 
+    //parse pagination parameters with defaults
+    const page = parseInt(req.query?.page) || 1;
+    const limit = parseInt(req.query?.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalRegistrationCount = await Registration.countDocuments({
+      userId,
+    });
+
     const events = await Registration.find({ userId })
       .populate(
         "eventId",
         "title type dateTime location price capacity attending bannerUrl"
       )
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
 
-    return res.status(200).json(events);
+    const totalPages = Math.ceil(totalRegistrationCount / limit);
+    const hasNextPage = page < totalPages;
+    const hasPrevPage = page > 1;
+
+    return res.status(200).json({
+      events,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalRegistrationCount,
+        hasNextPage,
+        hasPrevPage,
+        limit,
+      },
+    });
   } catch (err) {
     console.error("Error getting registered event list: ", err);
     res.status(400).json({

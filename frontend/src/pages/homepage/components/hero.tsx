@@ -11,7 +11,6 @@ export default function Hero() {
   const { isLoggedIn } = useAuth();
   const { isLoginDialogOpen, setLoginDialogOpen } = useLoginDailogContext();
 
-  console.log({ isLoggedIn, isLoginDialogOpen });
   function handleCreateEventButton() {
     if (isLoggedIn) {
       navigate({ to: "/dashboard/add-event" });

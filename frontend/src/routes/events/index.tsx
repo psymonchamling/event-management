@@ -1,86 +1,30 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
 import { Calendar, MapPin, Search, Filter } from "lucide-react";
-import React, { useEffect } from "react";
-
-import authAxios from "@/services/authAxios";
 import { Skeleton } from "@/components/ui/skeleton";
+import useAllEvent from "./-hooks/useAllEvent.hook";
 
 export const Route = createFileRoute("/events/")({
   component: EventsIndexPage,
 });
 
-type PublicEvent = {
-  _id: string;
-  title: string;
-  type: string;
-  dateTime?: string;
-  location?: string;
-  bannerUrl?: string;
-};
-
-type PublicEventListResponse = {
-  events: PublicEvent[];
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-};
-
-const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
-
 function EventsIndexPage() {
-  const [query, setQuery] = React.useState("");
-  const [type, setType] = React.useState<
-    "All" | "Conference" | "Workshop" | "Meetup" | "Seminar" | "Webinar"
-  >("All");
-  const [fromDate, setFromDate] = React.useState<string>("");
-  const [page, setPage] = React.useState(1);
-  const [pageSize] = React.useState(9);
+  const {
+    API_BASE_URL,
+    ACTION,
+    query,
+    queryDispatch,
+    isFetchingPublicEvent,
+    eventList,
+    currentPage,
+    totalEvents,
+    totalPages,
+    start,
+    end,
+  } = useAllEvent();
 
-  const { data, isLoading } = useQuery<PublicEventListResponse>({
-    queryKey: ["publicEvents"],
-    queryFn: () =>
-      authAxios
-        .get<PublicEventListResponse>("/api/events", {
-          params: { time: "latest" },
-        })
-        .then((res) => res.data),
-  });
-
-  const filtered = React.useMemo(() => {
-    const events = data?.events ?? [];
-    return events.filter((ev) => {
-      const matchesQuery =
-        !query ||
-        ev.title.toLowerCase().includes(query.toLowerCase()) ||
-        (ev.location ?? "").toLowerCase().includes(query.toLowerCase());
-
-      const matchesType =
-        type === "All" ||
-        (ev.type && ev.type.toLowerCase() === type.toLowerCase());
-
-      const eventDate = ev.dateTime ? new Date(ev.dateTime) : undefined;
-      const matchesDate =
-        !fromDate || (eventDate && eventDate >= new Date(fromDate));
-
-      return matchesQuery && matchesType && matchesDate;
-    });
-  }, [data, query, type, fromDate]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
-  const currentPage = Math.min(page, totalPages);
-  const start = (currentPage - 1) * pageSize;
-  const end = start + pageSize;
-  const paged = filtered.slice(start, end);
-
-  React.useEffect(() => {
-    setPage(1);
-  }, [query, type, fromDate]);
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  //for pagination
+  const minimumNumberOfButton = 6;
+  const numberOfButtonEachSide = 2;
 
   return (
     <main className="min-h-screen bg-background">
@@ -108,28 +52,28 @@ function EventsIndexPage() {
             <input
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               placeholder="Search events..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={query.search}
+              onChange={(e) =>
+                queryDispatch({
+                  type: ACTION.CHANGE_SEARCH,
+                  payload: e.target.value,
+                })
+              }
             />
           </div>
           <div className="flex items-center gap-2 rounded-lg border border-border px-3 py-2">
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               className="w-full bg-transparent text-sm outline-none"
-              value={type}
+              value={query.eventType}
               onChange={(e) =>
-                setType(
-                  e.target.value as
-                    | "All"
-                    | "Conference"
-                    | "Workshop"
-                    | "Meetup"
-                    | "Seminar"
-                    | "Webinar"
-                )
+                queryDispatch({
+                  type: ACTION.CHANGE_EVENTTYPE,
+                  payload: e.target.value,
+                })
               }
             >
-              <option value="All">All types</option>
+              <option value="">All types</option>
               <option value="Conference">Conference</option>
               <option value="Workshop">Workshop</option>
               <option value="Meetup">Meetup</option>
@@ -148,7 +92,7 @@ function EventsIndexPage() {
           </div> */}
         </div>
 
-        {isLoading ? (
+        {isFetchingPublicEvent ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {Array.from({ length: 6 }).map((_, idx) => (
               <div
@@ -167,73 +111,74 @@ function EventsIndexPage() {
         ) : (
           <>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {paged.map((ev) => {
-                const dateLabel = ev.dateTime
-                  ? new Date(ev.dateTime).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })
-                  : "Date not set";
+              {!!eventList?.length &&
+                eventList.map((event) => {
+                  const dateLabel = event?.dateTime
+                    ? new Date(event.dateTime).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })
+                    : "Date not set";
 
-                return (
-                  <a
-                    key={ev._id}
-                    href={`/events/${ev._id}`}
-                    aria-label={`View event ${ev.title}`}
-                    className="rounded-xl border border-border bg-background overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 cursor-pointer block"
-                  >
-                    <article>
-                      <div className="h-40 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 relative">
-                        {ev.bannerUrl ? (
-                          <img
-                            src={
-                              ev.bannerUrl.startsWith("/uploads/")
-                                ? `${API_BASE_URL}${ev.bannerUrl}`
-                                : ev.bannerUrl
-                            }
-                            alt={ev.title}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src =
-                                "/no-image.svg";
-                            }}
-                          />
-                        ) : null}
-                      </div>
-                      <div className="p-4 flex flex-col gap-3">
-                        <div className="flex items-center justify-between gap-2">
-                          <h3 className="text-lg font-semibold text-foreground">
-                            {ev.title}
-                          </h3>
-                          <span className="text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
-                            {ev.type}
-                          </span>
+                  return (
+                    <a
+                      key={event?._id}
+                      href={`/events/${event?._id}`}
+                      aria-label={`View event ${event?.title || ""}`}
+                      className="rounded-xl border border-border bg-background overflow-hidden transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/10 cursor-pointer block"
+                    >
+                      <article>
+                        <div className="h-40 bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 relative">
+                          {event?.bannerUrl ? (
+                            <img
+                              src={
+                                event.bannerUrl.startsWith("/uploads/")
+                                  ? `${API_BASE_URL}${event.bannerUrl}`
+                                  : event?.bannerUrl
+                              }
+                              alt={event?.title}
+                              className="absolute inset-0 w-full h-full object-cover"
+                              onError={(e) => {
+                                (e.target as HTMLImageElement).src =
+                                  "/no-image.svg";
+                              }}
+                            />
+                          ) : null}
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <MapPin className="h-4 w-4" />
-                          <span>{ev.location ?? "Online / TBA"}</span>
+                        <div className="p-4 flex flex-col gap-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="text-lg font-semibold text-foreground">
+                              {event?.title}
+                            </h3>
+                            <span className="text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
+                              {event?.type}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <MapPin className="h-4 w-4" />
+                            <span>{event?.location ?? "Online / TBA"}</span>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <Calendar className="h-4 w-4" />
+                            <span>{dateLabel}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <Calendar className="h-4 w-4" />
-                          <span>{dateLabel}</span>
-                        </div>
-                      </div>
-                    </article>
-                  </a>
-                );
-              })}
+                      </article>
+                    </a>
+                  );
+                })}
             </div>
 
             {/* Pagination */}
             <div className="mt-6 flex items-center justify-between">
               <div className="text-sm text-muted-foreground">
-                Showing {filtered.length === 0 ? 0 : start + 1}-
-                {Math.min(end, filtered.length)} of {filtered.length}
+                Showing {eventList?.length === 0 ? 0 : start + 1}-
+                {Math.min(end, totalEvents)} of {totalEvents}
               </div>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  onClick={() => queryDispatch({ type: ACTION.DECREASE_PAGE })}
                   disabled={currentPage === 1}
                   className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
                 >
@@ -243,10 +188,24 @@ function EventsIndexPage() {
                   {Array.from({ length: totalPages }).map((_, i) => {
                     const p = i + 1;
                     const isActive = p === currentPage;
+
+                    if (
+                      totalPages > minimumNumberOfButton &&
+                      p > 2 &&
+                      p <= totalPages - numberOfButtonEachSide
+                    ) {
+                      return "...";
+                    }
+
                     return (
                       <button
                         key={p}
-                        onClick={() => setPage(p)}
+                        onClick={() =>
+                          queryDispatch({
+                            type: ACTION.CHANGE_PAGE,
+                            payload: p.toString(),
+                          })
+                        }
                         className={`h-8 w-8 rounded-md border text-sm ${
                           isActive
                             ? "bg-secondary text-secondary-foreground"
@@ -259,8 +218,8 @@ function EventsIndexPage() {
                   })}
                 </div>
                 <button
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
+                  onClick={() => queryDispatch({ type: ACTION.INCREASE_PAGE })}
+                  disabled={currentPage >= totalPages}
                   className="rounded-md border px-3 py-1.5 text-sm disabled:opacity-50"
                 >
                   Next

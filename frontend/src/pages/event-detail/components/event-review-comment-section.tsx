@@ -46,7 +46,7 @@ const EventReviewCommentSection = ({
       eventId,
       reviewerId,
       rating: selectedRating,
-      review: newComment,
+      review: newComment.trim(),
     };
 
     submitReivew(finalPayload);

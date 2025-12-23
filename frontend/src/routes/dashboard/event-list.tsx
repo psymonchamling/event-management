@@ -113,7 +113,7 @@ function EventListPage() {
     isFetching,
   } = useQuery<EventListResponse>({
     queryFn: () => authAxios(generateQuery(query)).then((data) => data?.data),
-    queryKey: ["eventList", "mine", query],
+    queryKey: ["eventList", "mine"],
   });
 
   useEffect(() => {

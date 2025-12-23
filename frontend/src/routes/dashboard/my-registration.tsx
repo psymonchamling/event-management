@@ -46,13 +46,13 @@ function RegistrationPage() {
     });
   }, [search, status]); */
 
-  const { data: registrationList } = useQuery({
+  const { data: registrationData } = useQuery({
     queryFn: () => authAxios(generateQuery(userId)).then((data) => data?.data),
     queryKey: ["registrationList", userId],
     enabled: Boolean(userId),
   });
 
-  console.log({ registrationList });
+  const registrationList = registrationData?.events;
 
   return (
     <div className="px-4 lg:px-6">

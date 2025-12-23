@@ -48,19 +48,19 @@ export const createEvent = async (req, res) => {
 
 // Get all events (public), with optional filters & pagination
 // Query params (all optional):
-// - q: search by title (substring, case-insensitive)
+// - search: search by title (substring, case-insensitive)
 // - type: filter by event type (exact match string)
 // - time: "latest" | "oldest" (sort by dateTime)
 // - page: page number (1-based, default 1)
 // - limit: page size (default 10)
 export const getAllEvents = async (req, res) => {
   try {
-    const { q, type, time, page = "1", limit = "10" } = req.query;
+    const { search, type, time, page = "1", limit = "10" } = req.query;
 
     const filter = {};
 
-    if (q && typeof q === "string" && q.trim()) {
-      filter.title = { $regex: q.trim(), $options: "i" };
+    if (search && typeof search === "string" && search.trim()) {
+      filter.title = { $regex: search?.trim(), $options: "i" };
     }
 
     if (type && typeof type === "string" && type.trim()) {
@@ -91,10 +91,12 @@ export const getAllEvents = async (req, res) => {
 
     res.status(200).json({
       events,
-      page: pageNumber,
-      limit: pageSize,
-      total,
-      totalPages: Math.ceil(total / pageSize),
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize) || 1,
+      },
     });
   } catch (err) {
     console.error("Error fetching all events:", err);
@@ -120,12 +122,12 @@ export const getMyEvents = async (req, res) => {
       return res.status(401).json({ message: "Not authenticated" });
     }
 
-    const { q, type, time, page = "1", limit = "10" } = req.query;
+    const { search, type, time, page = "1", limit = "10" } = req.query;
 
     const filter = { organizerId };
 
-    if (q && typeof q === "string" && q.trim()) {
-      filter.title = { $regex: q.trim(), $options: "i" };
+    if (search && typeof search === "string" && search.trim()) {
+      filter.title = { $regex: search.trim(), $options: "i" };
     }
 
     if (type && typeof type === "string" && type.trim()) {
