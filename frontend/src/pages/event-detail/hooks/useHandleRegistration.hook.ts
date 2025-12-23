@@ -5,9 +5,14 @@ import type { AxiosError } from "axios";
 type PropsType = {
   userId: string;
   eventId: string;
+  handleRegistrationSuccess?: () => void;
 };
 
-const useHandleRegistration = ({ userId, eventId }: PropsType) => {
+const useHandleRegistration = ({
+  userId,
+  eventId,
+  handleRegistrationSuccess,
+}: PropsType) => {
   const queryClient = useQueryClient();
 
   const {
@@ -15,15 +20,14 @@ const useHandleRegistration = ({ userId, eventId }: PropsType) => {
     isPending: isPendingRegistrationStatus,
   } = useMutation({
     mutationFn: () =>
-      authAxios.post(
-        "/api/registration",
-        {
-          userId,
-          eventId,
-        },
-        { withCredentials: true }
-      ),
-    onSuccess: async () => {
+      authAxios.post("/api/registration", {
+        userId,
+        eventId,
+      }),
+    onSuccess: () => {
+      handleRegistrationSuccess?.();
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["userVerification", userId, eventId],
       });

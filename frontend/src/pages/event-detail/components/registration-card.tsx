@@ -29,7 +29,7 @@ const RegistrationCard = ({
   const fixedEventPrice: string = eventPrice.toFixed(2);
 
   //Registration check
-  const { data: newData } = useQuery({
+  const { data: newData, isFetching: isFetchingRegistrationStatus } = useQuery({
     queryFn: async () => {
       const res = await authAxios(
         `/api/registration/status?userId=${userId}&eventId=${eventId}`
@@ -65,21 +65,34 @@ const RegistrationCard = ({
           <>
             {!isCurrentUser && (
               <>
-                {isRegistered ? (
+                {isFetchingRegistrationStatus ? (
                   <button
                     disabled
                     className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium bg-secondary text-secondary-foreground shadow-none h-10 opacity-70 cursor-not-allowed"
                   >
-                    Already Registered
+                    Checking....
                   </button>
                 ) : (
-                  <button
-                    className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
-                    onClick={handleRegistration}
-                    disabled={isPaymentProcessing}
-                  >
-                    {isPaymentProcessing ? "Registerring..." : "Register Now"}
-                  </button>
+                  <>
+                    {isRegistered ? (
+                      <button
+                        disabled
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium bg-secondary text-secondary-foreground shadow-none h-10 opacity-70 cursor-not-allowed"
+                      >
+                        Already Registered
+                      </button>
+                    ) : (
+                      <button
+                        className="mt-4 inline-flex w-full items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring bg-primary text-primary-foreground shadow hover:bg-primary/90 h-10"
+                        onClick={handleRegistration}
+                        disabled={isPaymentProcessing}
+                      >
+                        {isPaymentProcessing
+                          ? "Registerring..."
+                          : "Register Now"}
+                      </button>
+                    )}
+                  </>
                 )}
               </>
             )}

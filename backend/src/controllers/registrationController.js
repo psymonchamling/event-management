@@ -40,7 +40,7 @@ export const registerForEvent = async (req, res) => {
 
   //Create registration
   try {
-    const newRegistration = Registration.create({
+    const newRegistration = await Registration.create({
       userId,
       eventId,
       status: "pending",

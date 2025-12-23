@@ -6,13 +6,14 @@ import PageSkeletonLoader from "@/pages/event-detail/components/event-page-skele
 import EventReviewSection from "@/pages/event-detail/components/event-review-section";
 import RegisteredUsersList from "@/pages/event-detail/components/registered-user-list";
 import RegistrationCard from "@/pages/event-detail/components/registration-card";
+import RegistrationSuccessDialogue from "@/pages/event-detail/components/registration-success-dailogue";
 import useHandleRegistration from "@/pages/event-detail/hooks/useHandleRegistration.hook";
 import authAxios from "@/services/authAxios";
 import { decodeBase64ToJSON } from "@/utlis/helper";
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { Calendar, MapPin, Users, Heart } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 // Use the same base URL as our authenticated API client so /uploads paths
 // resolve against the backend server, not the Vite dev server.
@@ -27,11 +28,14 @@ function EventDetailPage() {
   const { userData } = useAuth();
   const queryParams = Route.useSearch();
 
+  const [showSuccessDialog, setShowSuccessDialog] = useState<boolean>(false);
+
   const userId: string = userData?.user?._id || "";
 
   const { mutateRegistrationStatus } = useHandleRegistration({
     userId,
     eventId,
+    handleRegistrationSuccess,
   });
 
   const { data: eventDetail, isFetching: isFetchingEventDetail } = useQuery({
@@ -86,157 +90,164 @@ function EventDetailPage() {
     minute: "2-digit",
   });
 
-  return (
-    <main className="min-h-screen bg-background">
-      <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        <a
-          href="/events"
-          className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
-        >
-          <span className="inline-flex h-8 items-center rounded-md border border-border px-3">
-            Back to Events
-          </span>
-        </a>
+  function handleRegistrationSuccess() {
+    setShowSuccessDialog(true);
+  }
 
-        <div className="mt-6 grid gap-8 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <div className="overflow-hidden rounded-xl border border-border">
-              {eventDetail?.bannerUrl ? (
-                <img
-                  src={
-                    eventDetail.bannerUrl.startsWith("/uploads/")
-                      ? `${API_BASE_URL}${eventDetail.bannerUrl}`
-                      : eventDetail.bannerUrl
-                  }
-                  alt={eventDetail?.title || "Event banner"}
-                  className="aspect-[16/9] w-full h-auto object-cover bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "/no-image.svg";
-                  }}
-                />
-              ) : (
-                <div className="aspect-[16/9] w-full bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 flex items-center justify-center">
-                  <span className="text-sm text-muted-foreground">
-                    No image available
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="mt-6 flex items-start justify-between gap-4">
-              <div className="flex flex-col gap-2">
-                <span className="w-fit text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
-                  {eventDetail?.type}
-                </span>
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                  {eventDetail?.title}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2">
-                {isCurrentUser && (
-                  <>
-                    <a
-                      href={`/dashboard/edit-event?eventId=${eventId}`}
-                      className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition"
-                    >
-                      Edit event
-                    </a>
-                    <DeleteEventButton
-                      eventId={eventId}
-                      eventTitle={eventDetail.title}
-                    />
-                  </>
-                )}
-                <button
-                  aria-label="Add to favorites"
-                  className="rounded-full border border-border p-2 hover:bg-secondary transition"
-                >
-                  <Heart className="h-5 w-5" />
-                </button>
-              </div>
-            </div>
-            <div className="mt-6 grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-3">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground">
-                    Date & Time
-                  </span>
-                  <span className="text-sm">
-                    {dateLabel} at {timeLabel}
-                  </span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <MapPin className="h-5 w-5 text-muted-foreground" />
-                <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground">
-                    Location
-                  </span>
-                  <span className="text-sm">{eventDetail?.location || ""}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-3">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <div className="flex flex-col">
-                  <span className="text-xs text-muted-foreground">
-                    Attendees
-                  </span>
-                  <span className="text-sm">
-                    {/* {ev.attending}/{ev.capacity} */}
-                  </span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-8">
-              <h2 className="text-lg font-semibold text-foreground mb-2">
-                About This Event
-              </h2>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {eventDetail?.description}
-              </p>
-            </div>
-            <div className="mt-8 rounded-xl border border-border p-4">
-              <h3 className="text-sm font-semibold text-foreground mb-3">
-                Organized by
-              </h3>
-              <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-primary/10" />
-                <div className="flex flex-col">
-                  {isCurrentUser ? (
-                    <span className="text-m font-bold text-muted-foreground">
-                      You
+  return (
+    <>
+      <main className="min-h-screen bg-background">
+        <section className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+          <a
+            href="/events"
+            className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-2"
+          >
+            <span className="inline-flex h-8 items-center rounded-md border border-border px-3">
+              Back to Events
+            </span>
+          </a>
+
+          <div className="mt-6 grid gap-8 lg:grid-cols-3">
+            <div className="lg:col-span-2">
+              <div className="overflow-hidden rounded-xl border border-border">
+                {eventDetail?.bannerUrl ? (
+                  <img
+                    src={
+                      eventDetail.bannerUrl.startsWith("/uploads/")
+                        ? `${API_BASE_URL}${eventDetail.bannerUrl}`
+                        : eventDetail.bannerUrl
+                    }
+                    alt={eventDetail?.title || "Event banner"}
+                    className="aspect-[16/9] w-full h-auto object-cover bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "/no-image.svg";
+                    }}
+                  />
+                ) : (
+                  <div className="aspect-[16/9] w-full bg-gradient-to-br from-primary/15 via-accent/10 to-secondary/20 flex items-center justify-center">
+                    <span className="text-sm text-muted-foreground">
+                      No image available
                     </span>
-                  ) : (
+                  </div>
+                )}
+              </div>
+              <div className="mt-6 flex items-start justify-between gap-4">
+                <div className="flex flex-col gap-2">
+                  <span className="w-fit text-xs px-2 py-1 rounded-md bg-secondary text-secondary-foreground">
+                    {eventDetail?.type}
+                  </span>
+                  <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                    {eventDetail?.title}
+                  </h1>
+                </div>
+                <div className="flex items-center gap-2">
+                  {isCurrentUser && (
                     <>
-                      <span className="text-sm font-medium text-foreground">
-                        {eventOrganizer?.name || "N/A"}
-                      </span>
-                      <span className="text-xs text-muted-foreground">
-                        {eventOrganizer?.email || "N/A"}
-                      </span>
+                      <a
+                        href={`/dashboard/edit-event?eventId=${eventId}`}
+                        className="rounded-md border border-border px-3 py-2 text-sm font-medium hover:bg-accent transition"
+                      >
+                        Edit event
+                      </a>
+                      <DeleteEventButton
+                        eventId={eventId}
+                        eventTitle={eventDetail.title}
+                      />
                     </>
                   )}
+                  <button
+                    aria-label="Add to favorites"
+                    className="rounded-full border border-border p-2 hover:bg-secondary transition"
+                  >
+                    <Heart className="h-5 w-5" />
+                  </button>
                 </div>
               </div>
-            </div>
-            {isCurrentUser && (
-              <div className="mt-8 rounded-xl border border-border p-5">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-foreground">
-                    Registered Users
-                  </h3>
-                  <span className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground font-medium">
-                    Only visible to you
-                  </span>
+              <div className="mt-6 grid gap-4 rounded-xl border border-border p-4 sm:grid-cols-3">
+                <div className="flex items-center gap-3">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">
+                      Date & Time
+                    </span>
+                    <span className="text-sm">
+                      {dateLabel} at {timeLabel}
+                    </span>
+                  </div>
                 </div>
-                <RegisteredUsersList eventId={eventId} />
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">
+                      Location
+                    </span>
+                    <span className="text-sm">
+                      {eventDetail?.location || ""}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex flex-col">
+                    <span className="text-xs text-muted-foreground">
+                      Attendees
+                    </span>
+                    <span className="text-sm">
+                      {/* {ev.attending}/{ev.capacity} */}
+                    </span>
+                  </div>
+                </div>
               </div>
-            )}
+              <div className="mt-8">
+                <h2 className="text-lg font-semibold text-foreground mb-2">
+                  About This Event
+                </h2>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {eventDetail?.description}
+                </p>
+              </div>
+              <div className="mt-8 rounded-xl border border-border p-4">
+                <h3 className="text-sm font-semibold text-foreground mb-3">
+                  Organized by
+                </h3>
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-primary/10" />
+                  <div className="flex flex-col">
+                    {isCurrentUser ? (
+                      <span className="text-m font-bold text-muted-foreground">
+                        You
+                      </span>
+                    ) : (
+                      <>
+                        <span className="text-sm font-medium text-foreground">
+                          {eventOrganizer?.name || "N/A"}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {eventOrganizer?.email || "N/A"}
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+              {isCurrentUser && (
+                <div className="mt-8 rounded-xl border border-border p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold text-foreground">
+                      Registered Users
+                    </h3>
+                    <span className="text-xs px-2 py-1 rounded bg-secondary text-secondary-foreground font-medium">
+                      Only visible to you
+                    </span>
+                  </div>
+                  <RegisteredUsersList eventId={eventId} />
+                </div>
+              )}
 
-            <EventReviewSection isCurrentUser={isCurrentUser} />
+              <EventReviewSection isCurrentUser={isCurrentUser} />
 
-            {/* Similar event */}
-            {/* <div className="mt-8">
+              {/* Similar event */}
+              {/* <div className="mt-8">
               <h3 className="text-lg font-semibold text-foreground mb-4">
                 Similar Events
               </h3>
@@ -274,18 +285,23 @@ function EventDetailPage() {
                   })}
               </div>
             </div> */}
-          </div>
+            </div>
 
-          <RegistrationCard
-            userId={userId}
-            eventId={eventId}
-            eventPrice={eventDetail?.price || 0}
-            eventCapacity={eventDetail?.capacity || 0}
-            isCurrentUser={isCurrentUser}
-          />
-        </div>
-      </section>
-    </main>
+            <RegistrationCard
+              userId={userId}
+              eventId={eventId}
+              eventPrice={eventDetail?.price || 0}
+              eventCapacity={eventDetail?.capacity || 0}
+              isCurrentUser={isCurrentUser}
+            />
+          </div>
+        </section>
+      </main>
+      <RegistrationSuccessDialogue
+        showSuccessDialog={showSuccessDialog}
+        setShowSuccessDialog={setShowSuccessDialog}
+      />
+    </>
   );
 }
 
