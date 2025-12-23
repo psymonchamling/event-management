@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useReducer, useRef, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Calendar, MapPin, Search, Filter } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import authAxios from "@/services/authAxios";
@@ -30,11 +30,11 @@ type EventListResponse = {
 
 // Initial state
 const initialState = {
-  q: "",
+  search: "",
   type: "",
-  time: "",
-  page: "",
-  limit: "",
+  time: "latest",
+  page: 1,
+  limit: 10,
 };
 
 // Action types
@@ -54,14 +54,14 @@ type ActionType =
   | { type: "SET_QUERY"; payload: string }
   | { type: "SET_TYPE"; payload: string }
   | { type: "SET_TIME"; payload: string }
-  | { type: "SET_PAGE"; payload: string }
-  | { type: "SET_LIMIT"; payload: string };
+  | { type: "SET_PAGE"; payload: number }
+  | { type: "SET_LIMIT"; payload: number };
 
 // Reducer function
 const queryReducer = (state: StateType, action: ActionType) => {
   switch (action.type) {
     case ACTIONS.SET_QUERY:
-      return { ...state, q: action.payload };
+      return { ...state, search: action.payload };
 
     case ACTIONS.SET_TYPE:
       return { ...state, type: action.payload };
@@ -84,12 +84,14 @@ function generateQuery(query: StateType) {
   const url: string = "/api/events/mine";
 
   const entriesArray = Object.entries(query);
-  const queryString: string = entriesArray.reduce((acc, arr) => {
+  let queryString: string = entriesArray.reduce((acc, arr) => {
     if (arr[1]) {
-      return acc + `${arr[0]}=${arr[1]}`;
+      return acc + `${arr[0]}=${arr[1]}&`;
     }
     return acc;
   }, "");
+
+  queryString = queryString.slice(0, -1);
 
   if (queryString) {
     return url + "?" + queryString;
@@ -103,8 +105,7 @@ function EventListPage() {
     queryReducer,
     initialState as StateType
   );
-  const [debouncedSearch, setDebouncedSearch] = useState<string>(query.q);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedSearch, setDebouncedSearch] = useState<string>(query.search);
 
   const {
     data: eventList,
@@ -119,8 +120,8 @@ function EventListPage() {
   useEffect(() => {
     refetchEventList();
   }, [
-    debouncedSearch,
     refetchEventList,
+    debouncedSearch,
     query.time,
     query.limit,
     query.page,
@@ -128,16 +129,12 @@ function EventListPage() {
   ]);
 
   useEffect(() => {
-    timerRef.current = setTimeout(() => {
-      setDebouncedSearch(query.q);
+    const timerRef = setTimeout(() => {
+      setDebouncedSearch(query.search);
     }, 500);
 
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [query.q]);
+    return () => clearTimeout(timerRef);
+  }, [query.search]);
 
   return (
     <div className="px-4 lg:px-6">
@@ -163,7 +160,7 @@ function EventListPage() {
             <input
               className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               placeholder="Search events..."
-              value={query.q}
+              value={query.search}
               onChange={(e) =>
                 dispatchQuery({
                   type: ACTIONS.SET_QUERY,

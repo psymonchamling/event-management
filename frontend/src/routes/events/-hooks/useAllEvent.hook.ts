@@ -37,34 +37,39 @@ const initialState = {
   search: "",
   eventType: "", //  "All" | "Conference" | "Workshop" | "Meetup" | "Seminar" | "Webinar"
   page: 1,
+  limit: 10,
+  time: "latest",
 };
 
 type QueryType = typeof initialState;
-type ActionType = {
-  type: string;
-  payload?: string;
-};
 
 const ACTION = {
-  CHANGE_SEARCH: "CHANGE_SEARCH",
-  CHANGE_EVENTTYPE: "CHANGE_EVENTTYPE",
+  SET_QUERY: "SET_QUERY",
+  SET_TYPE: "SET_TYPE",
+  SET_PAGE: "SET_PAGE",
   INCREASE_PAGE: "INCREASE_PAGE",
   DECREASE_PAGE: "DECREASE_PAGE",
-  CHANGE_PAGE: "CHANGE_PAGE",
-};
+} as const;
+
+type ActionType =
+  | { type: "SET_QUERY"; payload: string }
+  | { type: "SET_TYPE"; payload: string }
+  | { type: "SET_PAGE"; payload: number }
+  | { type: "INCREASE_PAGE" }
+  | { type: "DECREASE_PAGE" };
 
 function queryReducer(state: QueryType, action: ActionType) {
   switch (action.type) {
-    case ACTION.CHANGE_SEARCH:
+    case ACTION.SET_QUERY:
       return { ...state, search: action?.payload || "", page: 1 };
-    case ACTION.CHANGE_EVENTTYPE:
+    case ACTION.SET_TYPE:
       return { ...state, eventType: action?.payload || "", page: 1 };
     case ACTION.INCREASE_PAGE:
       return { ...state, page: state.page + 1 };
     case ACTION.DECREASE_PAGE:
       return { ...state, page: state.page - 1 };
-    case ACTION.CHANGE_PAGE:
-      return { ...state, page: parseInt(action?.payload || "1") };
+    case ACTION.SET_PAGE:
+      return { ...state, page: action?.payload || 1 };
 
     default:
       throw new Error("Action not recognized.");
@@ -106,13 +111,11 @@ const useAllEvent = () => {
 
   //debouncing search
   useEffect(() => {
-    const intervalRef = setTimeout(() => {
+    const timerRef = setTimeout(() => {
       setDeferredSearch(query.search);
     }, 500);
 
-    return () => {
-      clearTimeout(intervalRef);
-    };
+    return () => clearTimeout(timerRef);
   }, [query.search]);
 
   //move screen to top

@@ -158,10 +158,12 @@ export const getMyEvents = async (req, res) => {
 
     res.status(200).json({
       events,
-      page: pageNumber,
-      limit: pageSize,
-      total,
-      totalPages: Math.ceil(total / pageSize),
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        total,
+        totalPages: Math.ceil(total / pageSize) || 1,
+      },
     });
   } catch (err) {
     console.error("Error fetching user events:", err);
@@ -198,15 +200,18 @@ export const deleteEvent = async (req, res) => {
   try {
     const eventId = req.params.id;
     const organizerId = req.userId;
+
     if (!organizerId) {
       return res.status(401).json({ message: "Not authenticated" });
     }
+
     const event = await Event.findOneAndDelete({ _id: eventId, organizerId });
     if (!event) {
       return res
         .status(404)
         .json({ message: "Event not found or access denied" });
     }
+
     return res.status(200).json({ message: "Event deleted successfully" });
   } catch (err) {
     console.error("Error deleting event:", err);
