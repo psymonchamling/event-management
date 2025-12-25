@@ -1,28 +1,9 @@
+import useQueryGetAllEvents from "@/hooks/useQueryGetAllEvents.hook";
 import authAxios from "@/services/authAxios";
-import { useQuery } from "@tanstack/react-query";
 import { useReducer, useState, useEffect, useCallback } from "react";
 
 const API_BASE_URL = (authAxios.defaults.baseURL || "").replace(/\/+$/, "");
-const DEFAULT_LIMI_PER_PAGE = 10;
-
-type PublicEvent = {
-  _id: string;
-  title: string;
-  type: string;
-  dateTime?: string;
-  location?: string;
-  bannerUrl?: string;
-};
-
-type PublicEventListResponse = {
-  events: PublicEvent[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-};
+const DEFAULT_LIMI_PER_PAGE: number = 10;
 
 const initialState = {
   search: "",
@@ -73,17 +54,24 @@ const useAllEvent = () => {
     query.search || ""
   );
 
+  const getParams = useCallback(() => {
+    const finalParams = new URLSearchParams({
+      ...(query.page > 1 && { page: query.page.toString() }),
+      ...(DEFAULT_LIMI_PER_PAGE !== 10 && {
+        limit: DEFAULT_LIMI_PER_PAGE.toString(),
+      }),
+      ...(deferredSearch && { search: deferredSearch }),
+      ...(query?.eventType && { type: query.eventType }),
+    });
+
+    return finalParams.toString();
+  }, [query, deferredSearch]);
+
   const {
     data: publicEventData,
     isFetching: isFetchingPublicEvent,
     refetch: refetchPublicEvent,
-  } = useQuery<PublicEventListResponse>({
-    queryKey: ["publicEvents"],
-    queryFn: () =>
-      authAxios<PublicEventListResponse>(`/api/events?${getParams()}`).then(
-        (res) => res.data
-      ),
-  });
+  } = useQueryGetAllEvents({ queryParams: getParams() });
 
   const eventList = publicEventData?.events;
   const {
@@ -92,7 +80,7 @@ const useAllEvent = () => {
     total: totalEvents = 0,
     totalPages = 1,
   } = publicEventData?.pagination || {};
-  
+
   const start = (currentPage - 1) * perPageLimit;
   const end = start + perPageLimit;
 
@@ -114,18 +102,6 @@ const useAllEvent = () => {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
-
-  const getParams = useCallback(() => {
-    const finalParams = new URLSearchParams({
-      time: "latest",
-      page: query.page.toString(),
-      limit: DEFAULT_LIMI_PER_PAGE.toString(),
-      ...(deferredSearch && { search: deferredSearch }),
-      ...(query?.eventType && { type: query.eventType }),
-    });
-
-    return finalParams.toString();
-  }, [query, deferredSearch]);
 
   return {
     API_BASE_URL,

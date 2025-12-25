@@ -55,7 +55,13 @@ export const createEvent = async (req, res) => {
 // - limit: page size (default 10)
 export const getAllEvents = async (req, res) => {
   try {
-    const { search, type, time, page = "1", limit = "10" } = req.query;
+    const {
+      search = "",
+      type = "",
+      time = "latest",
+      page = "1",
+      limit = "10",
+    } = req.query || {};
 
     const filter = {};
 
