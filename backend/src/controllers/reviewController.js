@@ -40,10 +40,43 @@ export const addReviewToEvent = async (req, res) => {
 
 export const getReviewsByEvent = async (req, res) => {
   const { eventId } = req.params;
+  const { page = "1", limit = "4" } = req.query;
+
+  const pageNumber = Math.max(
+    parseInt(typeof page === "string" ? page : String(page || "1"), 10) || 1,
+    1
+  );
+  const pageSize = Math.max(
+    parseInt(typeof limit === "string" ? limit : String(limit || "10"), 10) ||
+      10,
+    1
+  );
+  const skip = (pageNumber - 1) * pageSize;
 
   try {
-    const reviews = await Review.find({ eventId });
-    return res.status(200).json(reviews);
+    const [totalReiview, reviews] = await Promise.all([
+      Review.find({ eventId }).countDocuments(),
+      Review.find({ eventId })
+        .sort({
+          createdAt: -1,
+        })
+        .skip(skip)
+        .limit(pageSize),
+    ]);
+
+    const totalPages = Math.ceil(totalReiview / pageSize) || 1;
+
+    return res.status(200).json({
+      reviews,
+      pagination: {
+        page: pageNumber,
+        limit: pageSize,
+        total: totalReiview,
+        totalPages,
+        hasPrevPage: pageNumber > 1,
+        hasNextPage: pageNumber < totalPages,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Cannot get the reviews" });

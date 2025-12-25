@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Route } from "@/routes/events/$eventId";
 import authAxios from "@/services/authAxios";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import { Star } from "lucide-react";
 import { useMemo, useState } from "react";
 import EventReviewCommentSection from "./event-review-comment-section";
+
+const REVIEW_PER_PAGE = 4;
 
 type ReviewType = {
   _id: string;
@@ -19,30 +21,56 @@ type ReviewType = {
 };
 
 const EventReviewSection = ({ isCurrentUser }: { isCurrentUser: boolean }) => {
+  const queryClient = useQueryClient();
   const { eventId } = Route.useParams();
   const [writeReview, setWriteReview] = useState<boolean>(false);
 
   const {
-    data: reviewData,
-    isFetching: isFetchingReviewData,
-    refetch: refetchReviews,
-  } = useQuery({
-    queryFn: () => authAxios(`/api/review/${eventId}`).then((res) => res.data),
+    data: infinitedata,
+    isLoading: isLoadingReviewData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
     queryKey: ["reviews", eventId],
-    enabled: Boolean(eventId),
+    queryFn: ({ pageParam }) =>
+      authAxios(
+        `/api/review/${eventId}?page=${pageParam}&limit=${REVIEW_PER_PAGE}`
+      ).then((res) => res.data),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _allPages, lastPageParam) => {
+      if (lastPage?.pagination?.hasNextPage) {
+        return lastPageParam + 1;
+      }
+      return null;
+    },
   });
+
+  const finalReviewList = useMemo(() => {
+    if (infinitedata?.pages?.length) {
+      const finalList = infinitedata.pages.map((reviewData) => {
+        if (reviewData?.reviews?.length) return reviewData.reviews;
+
+        return [];
+      });
+
+      return finalList?.flat();
+    }
+  }, [infinitedata]);
 
   const averageRating = useMemo(
     () =>
-      reviewData?.length > 0
-        ? reviewData.reduce((sum: number, r: ReviewType) => sum + r.rating, 0) /
-          reviewData.length
+      finalReviewList?.length
+        ? finalReviewList.reduce(
+            (sum: number, r: ReviewType) => sum + r.rating,
+            0
+          ) / finalReviewList.length
         : 0,
-    [reviewData]
+    [finalReviewList]
   );
 
   function handleReviewSubmissionSuccess() {
-    refetchReviews();
+    queryClient.resetQueries({ queryKey: ["reviews", eventId] });
     setWriteReview(false);
   }
 
@@ -58,7 +86,7 @@ const EventReviewSection = ({ isCurrentUser }: { isCurrentUser: boolean }) => {
             Share your thoughts about this event
           </p>
         </div>
-        {reviewData?.length > 0 && (
+        {!!finalReviewList?.length && (
           <div className="flex items-center gap-2 bg-secondary/30 px-3 py-1.5 rounded-lg border border-border/50">
             <div className="flex items-center">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -99,15 +127,15 @@ const EventReviewSection = ({ isCurrentUser }: { isCurrentUser: boolean }) => {
       )}
 
       {/* Reviews list */}
-      {isFetchingReviewData ? (
+      {isLoadingReviewData ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {Array.from({ length: 4 }).map((_, i) => (
             <ReviewSkeleton key={i} />
           ))}
         </div>
-      ) : reviewData?.length > 0 ? (
+      ) : finalReviewList?.length ? (
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {reviewData.map((review: ReviewType) => (
+          {finalReviewList.map((review: ReviewType) => (
             <div
               key={review?._id}
               className="group rounded-lg border border-border p-4 bg-background transition-colors hover:border-primary/20"
@@ -137,6 +165,24 @@ const EventReviewSection = ({ isCurrentUser }: { isCurrentUser: boolean }) => {
               </p>
             </div>
           ))}
+          {isFetchingNextPage ? (
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <ReviewSkeleton key={i} />
+              ))}
+            </div>
+          ) : (
+            <>
+              {hasNextPage && !isFetchingNextPage && (
+                <button
+                  onClick={() => fetchNextPage()}
+                  className="col-span-full mt-2 text-center text-sm font-medium text-primary cursor-pointer hover:underline"
+                >
+                  Show more
+                </button>
+              )}
+            </>
+          )}
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center py-10 text-center border border-dashed border-border rounded-xl bg-secondary/5">
