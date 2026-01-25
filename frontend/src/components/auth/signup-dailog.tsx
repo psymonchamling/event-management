@@ -15,6 +15,8 @@ import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useNavigate } from "@tanstack/react-router";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 type SignupDialogProps = {
   isSignupOpen: boolean;
@@ -65,6 +67,9 @@ const SignupDialog = ({
   } = useForm<FormData>({
     resolver: yupResolver(schema),
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { mutate: mutateForm, isPending: isPendingForm } = useMutation({
     mutationFn: (data: MutationData) =>
@@ -138,13 +143,27 @@ const SignupDialog = ({
               <Label htmlFor="signup-password" className="text-sm font-medium">
                 Password
               </Label>
-              <Input
-                id="signup-password"
-                placeholder="••••••••"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                {...register("password")}
-                disabled={isPendingForm}
-              />
+              <div className="relative">
+                <Input
+                  id="signup-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  {...register("password")}
+                  disabled={isPendingForm}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {!!errors?.password?.message && (
                 <p className="text-xs text-red-500">
                   {errors.password.message}
@@ -155,13 +174,27 @@ const SignupDialog = ({
               <Label htmlFor="re-password" className="text-sm font-medium">
                 Re-enter Password
               </Label>
-              <Input
-                id="re-password"
-                placeholder="••••••••"
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
-                {...register("confirmPassword")}
-                disabled={isPendingForm}
-              />
+              <div className="relative">
+                <Input
+                  id="re-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm outline-none ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring/50 focus-visible:ring-[3px]"
+                  {...register("confirmPassword")}
+                  disabled={isPendingForm}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                >
+                  {showConfirmPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </button>
+              </div>
               {!!errors?.confirmPassword?.message && (
                 <p className="text-xs text-red-500">
                   {errors.confirmPassword.message}
