@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Moon, Sun } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { MouseEvent } from "react";
 import LoginDailog from "@/components/auth/login-dailog";
@@ -25,17 +25,6 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
 
   const isHomePage: boolean = pathname === "/";
 
-  const handleNavClick = (
-    e: MouseEvent<HTMLAnchorElement>,
-    targetId: string
-  ) => {
-    e.preventDefault();
-    const el = document.getElementById(targetId);
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
   const handleLogoClick = () => {
     if (isHomePage) {
       window.scrollTo({ top: 0, behavior: "smooth" });
@@ -46,7 +35,14 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
 
   useEffect(() => {
     refetchUserData();
-  }, []);
+  }, [refetchUserData]);
+
+  function handleHome(e: MouseEvent<HTMLAnchorElement, globalThis.MouseEvent>) {
+    if (isHomePage) {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }
 
   return (
     <>
@@ -69,49 +65,45 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
 
             {/* Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              {isHomePage && (
-                <>
-                  {isLoggedIn ? (
-                    <>
-                      <Link
-                        to="/dashboard"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        Dashboard
-                      </Link>
-                      <Link
-                        to="/events"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        Explore Event
-                      </Link>
-                    </>
-                  ) : (
-                    <>
-                      <a
-                        href="#features"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={(e) => handleNavClick(e, "features")}
-                      >
-                        Features
-                      </a>
-                      <Link
-                        to="/events"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        Explore Event
-                      </Link>
-                      <a
-                        href="#footer"
-                        className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-                        onClick={(e) => handleNavClick(e, "footer")}
-                      >
-                        Footer
-                      </a>
-                    </>
-                  )}
-                </>
+              {/* The onClick handler is triggered before the router's navigation logic. 
+                  Calling e.preventDefault() inside handleHome prevents the default 
+                  navigation when already on the home page, allowing the smooth 
+                  scroll behavior to take precedence. */}
+              <Link
+                to="/"
+                onClick={handleHome}
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Home
+              </Link>
+
+              {isLoggedIn && (
+                <Link
+                  to="/dashboard"
+                  className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  Dashboard
+                </Link>
               )}
+
+              <Link
+                to="/events"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Explore Event
+              </Link>
+              <Link
+                to="/about-us"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                About Us
+              </Link>
+              <Link
+                to="/contact-us"
+                className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Contact Us
+              </Link>
             </nav>
 
             {/* Auth Buttons & Theme Toggle */}

@@ -68,10 +68,17 @@ const LoginDailog = ({
       handleDialogOnOpenChange(false);
       navigate({ to: "/dashboard" });
     },
-    onError: (err: AxiosError<{ errors?: { email?: string } }>) => {
+    onError: (
+      err: AxiosError<{ errors?: { email?: string; password?: string } }>,
+    ) => {
       const emailError = err.response?.data?.errors?.email;
       if (emailError) {
         setError("email", { type: "server", message: emailError });
+      }
+
+      const passwordError = err.response?.data?.errors?.password;
+      if (passwordError) {
+        setError("password", { type: "server", message: passwordError });
       }
       console.error(err);
     },
